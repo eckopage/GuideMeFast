@@ -19,7 +19,8 @@
     "sourceMap": true,
     "outDir": "dist",
     "declarationDir": "dist",
-    "importHelpers": true
+    "importHelpers": true,
+    "types": ["node", "jest", "@testing-library/jest-dom"]
   },
   "include": [
     "src/**/*"

@@ -26,11 +26,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/guidemefast.git"
+    "url": "https://github.com/eckopage/guidemefast.git"
   },
-  "homepage": "https://github.com/yourusername/guidemefast#readme",
+  "homepage": "https://github.com/eckopage/guidemefast#readme",
   "bugs": {
-    "url": "https://github.com/yourusername/guidemefast/issues"
+    "url": "https://github.com/eckopage/guidemefast/issues"
   },
   "scripts": {
     "build": "rollup -c",
@@ -49,15 +49,23 @@
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-react": "^7.22.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.5.1",
     "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.0",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
-    "@types/node": "^20.10.0",
+    "@types/testing-library__jest-dom": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -75,7 +83,7 @@
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {
-    "@mui/material": "^5.15.3",
-    "@mui/icons-material": "^5.15.3"
+    "@mui/icons-material": "^5.15.3",
+    "@mui/material": "^5.15.3"
   }
 }

@@ -1,9 +1,422 @@
-/* src/styles.css */
+/* GuideMeFast Styles */
 .guidemefast-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 9999;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.guidemefast-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    pointer-events: all;
+    transition: opacity 0.3s ease;
+}
+
+.guidemefast-highlight {
+    border-radius: 8px;
+    box-shadow:
+            0 0 0 4px rgba(255, 255, 255, 0.2),
+            0 0 0 2px rgba(255, 255, 255, 0.4),
+            0 0 20px rgba(255, 255, 255, 0.3);
+    background: transparent;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    animation: guidemefast-pulse 2s infinite;
+}
+
+@keyframes guidemefast-pulse {
+    0%, 100% {
+        box-shadow:
+                0 0 0 4px rgba(255, 255, 255, 0.2),
+                0 0 0 2px rgba(255, 255, 255, 0.4),
+                0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow:
+                0 0 0 8px rgba(255, 255, 255, 0.1),
+                0 0 0 4px rgba(255, 255, 255, 0.3),
+                0 0 30px rgba(255, 255, 255, 0.4);
+    }
+}
+
+.guidemefast-tooltip {
+    min-width: 280px;
+    max-width: 400px;
+    background: white;
+    border-radius: 12px;
+    box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.15),
+            0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    pointer-events: all;
+    position: relative;
+    animation: guidemefast-tooltip-enter 0.3s ease-out;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@keyframes guidemefast-tooltip-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.guidemefast-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.guidemefast-close:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #333;
+}
+
+.guidemefast-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+}
+
+.guidemefast-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.guidemefast-step-counter {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.guidemefast-content {
+    padding: 40px 24px 24px;
+}
+
+.guidemefast-title {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+}
+
+.guidemefast-body {
+    margin: 0;
+    color: #666;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.guidemefast-navigation {
+    padding: 0 24px 24px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.guidemefast-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guidemefast-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.guidemefast-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.guidemefast-btn-primary:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+}
+
+.guidemefast-btn-secondary {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e9ecef;
+}
+
+.guidemefast-btn-secondary:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.guidemefast-btn-ghost {
+    background: transparent;
+    color: #6c757d;
+    margin-right: auto;
+}
+
+.guidemefast-btn-ghost:hover:not(:disabled) {
+    color: #495057;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* Arrow styles */
+.guidemefast-arrow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transform: rotate(45deg);
+}
+
+.guidemefast-arrow-top {
+    bottom: -6px;
+    left: 50%;
+    margin-left: -6px;
+    border-top: none;
+    border-left: none;
+}
+
+.guidemefast-arrow-bottom {
+    top: -6px;
+    left: 50%;
+    margin-left: -6px;
+    border-bottom: none;
+    border-right: none;
+}
+
+.guidemefast-arrow-left {
+    right: -6px;
+    top: 50%;
+    margin-top: -6px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.guidemefast-arrow-right {
+    left: -6px;
+    top: 50%;
+    margin-top: -6px;
+    border-right: none;
+    border-top: none;
+}
+
+/* Dark theme */
+.guidemefast-theme-dark .guidemefast-tooltip {
+    background: #2d3748;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.guidemefast-theme-dark .guidemefast-title {
+    color: white;
+}
+
+.guidemefast-theme-dark .guidemefast-body {
+    color: #cbd5e0;
+}
+
+.guidemefast-theme-dark .guidemefast-close {
+    color: #cbd5e0;
+}
+
+.guidemefast-theme-dark .guidemefast-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.guidemefast-theme-dark .guidemefast-step-counter {
+    background: rgba(255, 255, 255, 0.1);
+    color: #cbd5e0;
+}
+
+.guidemefast-theme-dark .guidemefast-progress {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.guidemefast-theme-dark .guidemefast-btn-secondary {
+    background: #4a5568;
+    color: white;
+    border-color: #6b7280;
+}
+
+.guidemefast-theme-dark .guidemefast-btn-secondary:hover:not(:disabled) {
+    background: #6b7280;
+}
+
+.guidemefast-theme-dark .guidemefast-btn-ghost {
+    color: #9ca3af;
+}
+
+.guidemefast-theme-dark .guidemefast-btn-ghost:hover:not(:disabled) {
+    color: #cbd5e0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.guidemefast-theme-dark .guidemefast-arrow {
+    background: #2d3748;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Material theme */
+.guidemefast-theme-material .guidemefast-tooltip {
+    border-radius: 4px;
+    box-shadow:
+            0 11px 15px -7px rgba(0, 0, 0, 0.2),
+            0 24px 38px 3px rgba(0, 0, 0, 0.14),
+            0 9px 46px 8px rgba(0, 0, 0, 0.12);
+}
+
+.guidemefast-theme-material .guidemefast-btn {
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.guidemefast-theme-material .guidemefast-btn-primary {
+    background: #1976d2;
+    box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+}
+
+.guidemefast-theme-material .guidemefast-btn-primary:hover:not(:disabled) {
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.guidemefast-theme-material .guidemefast-progress-bar {
+    background: #1976d2;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .guidemefast-tooltip {
+        min-width: 260px;
+        max-width: calc(100vw - 40px);
+        margin: 0 20px;
+    }
+
+    .guidemefast-content {
+        padding: 32px 20px 20px;
+    }
+
+    .guidemefast-navigation {
+        padding: 0 20px 20px;
+        flex-wrap: wrap;
+    }
+
+    .guidemefast-btn {
+        min-width: 70px;
+        font-size: 13px;
+    }
+
+    .guidemefast-step-counter {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .guidemefast-navigation {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .guidemefast-btn {
+        width: 100%;
+        margin: 2px 0;
+    }
+
+    .guidemefast-btn-ghost {
+        order: -1;
+        margin-bottom: 8px;
+    }
+}
+
+/* Animation utilities */
+@keyframes guidemefast-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+.guidemefast-shake {
+    animation: guidemefast-shake 0.5s ease-in-out;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .guidemefast-tooltip {
+        border: 2px solid;
+    }
+
+    .guidemefast-highlight {
+        box-shadow:
+                0 0 0 4px currentColor,
+                0 0 0 6px white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .guidemefast-tooltip {
+        animation: none;
+    }
+
+    .guidemefast-highlight {
+        animation: none;
+    }
+
+    .guidemefast-btn {
+        transition: none;
+    }
+
+    .guidemefast-progress-bar {
+        transition: none;
+    }
 }
