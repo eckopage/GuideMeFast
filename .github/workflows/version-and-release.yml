@@ -83,7 +83,28 @@ jobs:
           echo "Commits since $LAST_TAG:"
           echo "$COMMITS"
 
-          # Rest of the analysis logic...
+          # DODAJ BRAKUJĄCĄ LOGIKĘ:
+          # Analyze commit messages for conventional commits
+          BUMP_TYPE="patch"
+
+          if echo "$COMMITS" | grep -qE "(feat|feature).*!:|BREAKING CHANGE|breaking change"; then
+           BUMP_TYPE="major"
+           echo "🚨 Breaking changes detected"
+          elif echo "$COMMITS" | grep -qE "(feat|feature)(\(.+\))?:"; then
+           BUMP_TYPE="minor"
+           echo "✨ New features detected"
+          elif echo "$COMMITS" | grep -qE "(fix|bugfix)(\(.+\))?:"; then
+           BUMP_TYPE="patch"
+           echo "🐛 Bug fixes detected"
+          elif echo "$COMMITS" | grep -qE "(docs|chore|style|refactor|test|ci)(\(.+\))?:"; then
+           echo "📝 Non-release commits detected - skipping release"
+           echo "should-release=false" >> $GITHUB_OUTPUT
+           exit 0
+          fi
+
+          echo "Determined bump type: $BUMP_TYPE"
+          echo "bump-type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "should-release=true" >> $GITHUB_OUTPUT
 
       - name: Configure Git
         if: steps.version.outputs.should-release == 'true'
@@ -198,6 +219,47 @@ jobs:
           fi
           
           echo "✅ Published guidemefast@$VERSION_NUMBER to NPM"
+
+      - name: Generate release notes
+        if: steps.version.outputs.should-release == 'true'
+        id: release-notes
+        run: |
+          echo "Generating release notes..."
+          
+          if git describe --tags --abbrev=0 >/dev/null 2>&1; then
+            LAST_TAG=$(git describe --tags --abbrev=0)
+            if [ "$LAST_TAG" != "${{ steps.bump.outputs.new-version }}" ]; then
+              CHANGES=$(git log ${LAST_TAG}..HEAD --oneline --no-merges | head -10 | sed 's/^/- /')
+            else
+              CHANGES="- Initial release"
+            fi
+          else
+            CHANGES=$(git log --oneline --no-merges -5 | sed 's/^/- /')
+          fi
+          
+          if [ -z "$CHANGES" ]; then
+            CHANGES="- Package improvements and updates"
+          fi
+          
+          # Save to output file
+          cat > release_notes.txt << EOF
+          ## 🚀 GuideMeFast ${{ steps.bump.outputs.new-version }}
+          
+          **Release Type:** ${{ steps.version.outputs.bump-type }}
+          
+          ### 📦 Installation
+          \`\`\`bash
+          npm install guidemefast@${{ steps.bump.outputs.version-number }}
+          \`\`\`
+          
+          ### 📊 What's Changed
+          $CHANGES
+          
+          ---
+          *This release was automatically created by GitHub Actions*
+          EOF
+          
+          echo "✅ Release notes generated"
 
       - name: Create GitHub Release
         if: steps.version.outputs.should-release == 'true'
