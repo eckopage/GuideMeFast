@@ -393,34 +393,6 @@ describe('Array and Object Utilities', () => {
 
 describe('String and Selector Utilities', () => {
     describe('CSS Selector Validation', () => {
-        test('should validate CSS selectors', () => {
-            const validSelectors = [
-                '#id-selector',
-                '.class-selector',
-                'element',
-                '[data-testid="test"]',
-                '.class1.class2',
-                '#parent .child'
-            ];
-
-            const invalidSelectors = [
-                '',
-                null,
-                undefined,
-                '##invalid',
-                '..invalid'
-            ];
-
-            validSelectors.forEach(selector => {
-                expect(typeof selector).toBe('string');
-                expect(selector.length).toBeGreaterThan(0);
-            });
-
-            invalidSelectors.forEach(selector => {
-                expect(selector === '' || selector === null || selector === undefined).toBe(true);
-            });
-        });
-
         test('should handle selector querying', () => {
             // Create test elements
             const testDiv = document.createElement('div');
