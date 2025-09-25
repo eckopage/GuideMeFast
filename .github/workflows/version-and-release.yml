@@ -1,0 +1,307 @@
+name: Version and Release
+
+on:
+  push:
+    branches: [ main, master ]
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+  pull_request:
+    branches: [ main, master ]
+    types: [ closed ]
+
+jobs:
+  version-and-release:
+    # Uruchom tylko dla merged PR lub bezpośredniego push do main
+    if: github.event.pull_request.merged == true || (github.event_name == 'push' && contains(fromJson('["main", "master"]'), github.ref_name))
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Quality gates
+      - name: Run tests
+        run: npm test
+
+      - name: Run type check
+        run: npm run type-check
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build package
+        run: npm run build
+
+      # Determine version bump from conventional commits
+      - name: Analyze commits for version bump
+        id: version
+        run: |
+          # Get last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Last tag: $LAST_TAG"
+          
+          # Get commits since last tag
+          COMMITS=$(git log ${LAST_TAG}..HEAD --oneline --no-merges)
+          
+          if [ -z "$COMMITS" ]; then
+            echo "No new commits since last release"
+            echo "should-release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Commits since $LAST_TAG:"
+          echo "$COMMITS"
+          
+          # Analyze commit messages for conventional commits
+          BUMP_TYPE="patch"
+          
+          if echo "$COMMITS" | grep -qE "(feat|feature).*!:|BREAKING CHANGE|breaking change"; then
+            BUMP_TYPE="major"
+            echo "🚨 Breaking changes detected"
+          elif echo "$COMMITS" | grep -qE "(feat|feature)(\(.+\))?:"; then
+            BUMP_TYPE="minor"
+            echo "✨ New features detected"
+          elif echo "$COMMITS" | grep -qE "(fix|bugfix)(\(.+\))?:"; then
+            BUMP_TYPE="patch"
+            echo "🐛 Bug fixes detected"
+          elif echo "$COMMITS" | grep -qE "(docs|chore|style|refactor|test|ci)(\(.+\))?:"; then
+            echo "📝 Non-release commits detected - skipping release"
+            echo "should-release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Determined bump type: $BUMP_TYPE"
+          echo "bump-type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "should-release=true" >> $GITHUB_OUTPUT
+
+      - name: Configure Git
+        if: steps.version.outputs.should-release == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Bump version
+        if: steps.version.outputs.should-release == 'true'
+        id: bump
+        run: |
+          BUMP_TYPE="${{ steps.version.outputs.bump-type }}"
+          echo "Bumping $BUMP_TYPE version..."
+          
+          NEW_VERSION=$(npm version $BUMP_TYPE --no-git-tag-version)
+          echo "Version bumped to $NEW_VERSION"
+          
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version-number=$(echo $NEW_VERSION | sed 's/v//')" >> $GITHUB_OUTPUT
+
+      - name: Rebuild with new version
+        if: steps.version.outputs.should-release == 'true'
+        run: npm run build
+
+      - name: Verify build output
+        if: steps.version.outputs.should-release == 'true'
+        run: |
+          echo "Verifying build output..."
+          REQUIRED_FILES=(
+            "dist/index.js"
+            "dist/index.esm.js"
+            "dist/index.d.ts"
+            "dist/vanilla.js"
+            "dist/guidemefast.min.js"
+          )
+          
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            fi
+          done
+          echo "✅ All required files present"
+
+      - name: Create commit and tag
+        if: steps.version.outputs.should-release == 'true'
+        run: |
+          NEW_VERSION="${{ steps.bump.outputs.new-version }}"
+          
+          # Add changed files
+          git add package.json package-lock.json
+          
+          # Create commit with detailed message
+          COMMIT_MSG="chore: release $NEW_VERSION
+
+          🚀 Automated release via GitHub Actions
+          📦 Package: guidemefast@$(echo $NEW_VERSION | sed 's/v//')
+          🔄 Bump type: ${{ steps.version.outputs.bump-type }}
+          
+          Changes included in this release:
+          $(git log $(git describe --tags --abbrev=0 2>/dev/null || echo 'HEAD~10')..HEAD --oneline --no-merges | head -10)"
+          
+          git commit -m "$COMMIT_MSG"
+          git tag "$NEW_VERSION"
+
+      - name: Push changes and tags
+        if: steps.version.outputs.should-release == 'true'
+        run: |
+          # Push to the current branch (main or master)
+          git push origin ${{ github.ref_name }}
+          git push origin ${{ steps.bump.outputs.new-version }}
+
+      - name: Publish to NPM
+        if: steps.version.outputs.should-release == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Publishing to NPM..."
+          VERSION_NUMBER="${{ steps.bump.outputs.version-number }}"
+          
+          # Check if it's a pre-release version
+          if echo "$VERSION_NUMBER" | grep -qE "(alpha|beta|rc)"; then
+            echo "Publishing pre-release version with 'next' tag"
+            npm publish --tag next
+          else
+            echo "Publishing stable release"
+            npm publish
+          fi
+          
+          echo "✅ Published guidemefast@$VERSION_NUMBER to NPM"
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.should-release == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.bump.outputs.new-version }}
+          release_name: "GuideMeFast ${{ steps.bump.outputs.new-version }}"
+          body: |
+            ## 🚀 GuideMeFast ${{ steps.bump.outputs.new-version }}
+            
+            **Release Type:** ${{ steps.version.outputs.bump-type }}
+            
+            ### 📦 Installation
+            ```bash
+            npm install guidemefast@${{ steps.bump.outputs.version-number }}
+            yarn add guidemefast@${{ steps.bump.outputs.version-number }}
+            pnpm add guidemefast@${{ steps.bump.outputs.version-number }}
+            ```
+            
+            ### 🌐 CDN Usage
+            ```html
+            <!-- Latest version -->
+            <script src="https://unpkg.com/guidemefast@latest/dist/guidemefast.min.js"></script>
+            <link rel="stylesheet" href="https://unpkg.com/guidemefast@latest/dist/index.css">
+            
+            <!-- Specific version -->
+            <script src="https://unpkg.com/guidemefast@${{ steps.bump.outputs.version-number }}/dist/guidemefast.min.js"></script>
+            <link rel="stylesheet" href="https://unpkg.com/guidemefast@${{ steps.bump.outputs.version-number }}/dist/index.css">
+            ```
+            
+            ### 🔗 Links
+            - [NPM Package](https://www.npmjs.com/package/guidemefast)
+            - [Documentation](https://github.com/${{ github.repository }}#readme)
+            - [UnPkg CDN](https://unpkg.com/guidemefast@${{ steps.bump.outputs.version-number }}/)
+            - [jsDelivr CDN](https://cdn.jsdelivr.net/npm/guidemefast@${{ steps.bump.outputs.version-number }}/)
+            
+            ### 📊 What's Changed
+            $(git log $(git describe --tags --abbrev=0 2>/dev/null)..HEAD --oneline --no-merges | sed 's/^/- /')
+            
+            ---
+            *This release was automatically created by GitHub Actions* 🤖
+          draft: false
+          prerelease: ${{ contains(steps.bump.outputs.version-number, 'alpha') || contains(steps.bump.outputs.version-number, 'beta') || contains(steps.bump.outputs.version-number, 'rc') }}
+
+      - name: Verify NPM publication
+        if: steps.version.outputs.should-release == 'true'
+        run: |
+          echo "Waiting for NPM propagation..."
+          sleep 30
+          
+          VERSION_NUMBER="${{ steps.bump.outputs.version-number }}"
+          MAX_RETRIES=10
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if npm view guidemefast@$VERSION_NUMBER version >/dev/null 2>&1; then
+              echo "✅ Package verified on NPM registry"
+              PUBLISHED_VERSION=$(npm view guidemefast@$VERSION_NUMBER version)
+              echo "Published version: $PUBLISHED_VERSION"
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Verification attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying in 10s..."
+                sleep 10
+              else
+                echo "❌ Failed to verify package after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Post-release summary
+        if: steps.version.outputs.should-release == 'true'
+        run: |
+          echo "🎉 Release Summary"
+          echo "=================="
+          echo "Package: guidemefast"
+          echo "Version: ${{ steps.bump.outputs.new-version }}"
+          echo "NPM: https://www.npmjs.com/package/guidemefast"
+          echo "CDN: https://unpkg.com/guidemefast@latest/"
+          echo ""
+          echo "The release is now live! 🚀"
+
+  # Separate job for non-release builds (PRs)
+  test-only:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run type check
+        run: npm run type-check
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build package
+        run: npm run build
+
+      - name: Test summary
+        run: |
+          echo "✅ All quality checks passed!"
+          echo "This PR is ready for merge when approved."

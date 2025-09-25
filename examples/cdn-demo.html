@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GuideMeFast - Interactive Demo | Modern Tour Library</title>
-    <link rel="stylesheet" href="../dist/index.css">
+    <!-- Link to the fixed styles -->
+    <link rel="stylesheet" href="../src/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS Variables for theming */
+        /* Demo page specific styles */
         :root {
             --primary: #667eea;
             --primary-dark: #5a6fd8;
@@ -27,19 +28,18 @@
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            --shadow-glow: 0 0 0 3px rgb(102 126 234 / 0.1);
             --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         }
 
         [data-theme="dark"] {
-            --text-primary: #f9fafb;
-            --text-secondary: #d1d5db;
-            --text-muted: #9ca3af;
-            --bg-primary: #111827;
-            --bg-secondary: #1f2937;
-            --bg-tertiary: #374151;
-            --border: #374151;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --border: #475569;
         }
 
         * {
@@ -68,6 +68,10 @@
             transition: all 0.3s ease;
         }
 
+        [data-theme="dark"] .header {
+            background: rgba(15, 23, 42, 0.95);
+        }
+
         .nav {
             max-width: 1200px;
             margin: 0 auto;
@@ -94,7 +98,7 @@
 
         .theme-toggle {
             background: none;
-            border: none;
+            border: 1px solid var(--border);
             padding: 0.5rem;
             border-radius: 0.5rem;
             cursor: pointer;
@@ -105,6 +109,7 @@
         .theme-toggle:hover {
             background: var(--bg-tertiary);
             color: var(--text-primary);
+            border-color: var(--primary);
         }
 
         /* Hero Section */
@@ -163,7 +168,7 @@
             flex-wrap: wrap;
         }
 
-        /* Buttons */
+        /* Demo Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -204,7 +209,7 @@
         .btn-primary:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .btn-secondary {
@@ -237,7 +242,7 @@
             padding: 0 2rem;
         }
 
-        /* Features Grid */
+        /* Features Section */
         .features-section {
             padding: 5rem 0;
             background: var(--bg-secondary);
@@ -433,7 +438,7 @@
             border-color: var(--primary);
         }
 
-        /* Interactive Controls */
+        /* Controls Section */
         .controls-section {
             padding: 3rem 0;
             background: var(--bg-tertiary);
@@ -497,6 +502,27 @@
             color: var(--primary);
         }
 
+        /* Status indicator */
+        .status-indicator {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            z-index: 200;
+            transition: all 0.2s ease;
+        }
+
+        .status-indicator.active {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .hero {
@@ -510,6 +536,7 @@
             .hero-buttons {
                 flex-direction: column;
                 align-items: center;
+                gap: 0.75rem;
             }
 
             .demo-content {
@@ -550,26 +577,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        /* Status indicator */
-        .status-indicator {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            box-shadow: var(--shadow-md);
-            z-index: 200;
-        }
-
-        .status-indicator.active {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
         }
     </style>
 </head>
@@ -766,18 +773,17 @@
             <a href="https://github.com/eckopage/GuideMeFast/tree/main/examples" class="footer-link">Examples</a>
         </div>
         <div class="footer-content">
-            <p>&copy; 2024 GuideMeFast. Built with ❤️ for developers.</p>
+            <p>&copy; 2024 GuideMeFast. Built with love for developers.</p>
             <p>Open source • TypeScript • Framework agnostic</p>
         </div>
     </div>
 </footer>
 
-<!-- Scripts -->
+<!-- Use CDN build for demo -->
 <script src="../dist/guidemefast.min.js"></script>
 <script>
     // Theme management
     let currentTheme = 'light';
-    let currentSpeed = 'normal';
 
     function toggleTheme() {
         currentTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -785,40 +791,32 @@
 
         const themeIcon = document.querySelector('#theme-toggle i');
         themeIcon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-
-        // Update header background for dark theme
-        const header = document.querySelector('.header');
-        if (currentTheme === 'dark') {
-            header.style.background = 'rgba(17, 24, 39, 0.95)';
-        } else {
-            header.style.background = 'rgba(255, 255, 255, 0.95)';
-        }
     }
 
-    // Tour configurations
+    // Tour configurations with updated themes
     const basicTourConfig = {
         steps: [
             {
                 target: '#hero-section',
-                title: 'Welcome to GuideMeFast! 🚀',
+                title: 'Welcome to GuideMeFast!',
                 content: 'This is where your user journey begins. Great onboarding starts with a compelling introduction that sets expectations and builds excitement.',
                 placement: 'bottom'
             },
             {
                 target: '#feature-performance',
-                title: 'Lightning Fast Performance ⚡',
+                title: 'Lightning Fast Performance',
                 content: 'Performance matters. GuideMeFast is optimized for speed with under 15KB bundle size and 60fps animations.',
                 placement: 'bottom'
             },
             {
                 target: '#feature-frameworks',
-                title: 'Works Everywhere 🌐',
+                title: 'Works Everywhere',
                 content: 'Use with any framework or vanilla JavaScript. React, Vue, Angular - we support them all with TypeScript included.',
                 placement: 'left'
             },
             {
                 target: '#dashboard-mockup',
-                title: 'Interactive Elements 🎯',
+                title: 'Interactive Elements',
                 content: 'Tours can interact with your actual application components, making the experience feel natural and engaging.',
                 placement: 'right'
             }
@@ -827,7 +825,7 @@
         showProgress: true,
         showStepNumbers: true,
         onComplete: () => {
-            showNotification('🎉 Basic tour completed! You\'re ready to create amazing user experiences.', 'success');
+            showNotification('Basic tour completed! You\'re ready to create amazing user experiences.', 'success');
         },
         onSkip: () => {
             showNotification('Tour skipped. You can restart it anytime!', 'info');
@@ -838,17 +836,16 @@
         steps: [
             {
                 target: '#dashboard-title',
-                title: 'Advanced Features Demo 🧙‍♂️',
+                title: 'Advanced Features Demo',
                 content: 'This tour showcases advanced GuideMeFast capabilities including async operations and dynamic content.',
                 placement: 'bottom'
             },
             {
                 target: '#refresh-data',
-                title: 'Async Operations ⚡',
+                title: 'Async Operations',
                 content: 'Watch as we simulate loading new data. Tours can handle async operations seamlessly.',
                 placement: 'left',
                 onNext: async () => {
-                    // Simulate data refresh
                     const refreshBtn = document.getElementById('refresh-data');
                     const originalText = refreshBtn.innerHTML;
                     refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
@@ -856,7 +853,6 @@
 
                     await new Promise(resolve => setTimeout(resolve, 2000));
 
-                    // Update stats with new "data"
                     const stats = document.querySelectorAll('.stat-number');
                     stats[0].textContent = '3,124';
                     stats[1].textContent = '96%';
@@ -869,28 +865,27 @@
             },
             {
                 target: '#dashboard-stats',
-                title: 'Dynamic Content Updates 📊',
+                title: 'Dynamic Content Updates',
                 content: 'Notice how the statistics changed! Tours can trigger real application logic and show users the results.',
                 placement: 'top'
             },
             {
                 target: '#dashboard-actions',
-                title: 'Interactive Workflows 🔄',
+                title: 'Interactive Workflows',
                 content: 'Guide users through complex workflows by combining tours with your application\'s functionality.',
                 placement: 'bottom'
             },
             {
                 target: '#theme-control',
-                title: 'Theme Customization 🎨',
+                title:                 'Theme Customization',
                 content: 'Tours automatically adapt to your application\'s theme changes, maintaining visual consistency.',
                 placement: 'right',
                 onNext: () => {
-                    // Demonstrate theme switching
                     const originalTheme = currentTheme;
                     toggleTheme();
                     setTimeout(() => {
                         if (currentTheme !== originalTheme) {
-                            toggleTheme(); // Switch back
+                            toggleTheme();
                         }
                     }, 1500);
                 }
@@ -899,15 +894,8 @@
         theme: currentTheme,
         backdropOpacity: 0.8,
         showProgress: true,
-        customStyles: {
-            tooltip: {
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none'
-            }
-        },
         onComplete: () => {
-            showNotification('🌟 Advanced demo completed! You\'ve seen the power of interactive tours.', 'success');
+            showNotification('Advanced demo completed! You\'ve seen the power of interactive tours.', 'success');
         }
     };
 
@@ -915,19 +903,19 @@
         steps: [
             {
                 target: '#theme-toggle',
-                title: 'Dark Mode Excellence 🌙',
+                title: 'Dark Mode Excellence',
                 content: 'GuideMeFast looks stunning in dark mode with carefully crafted contrast and accessibility.',
                 placement: 'bottom'
             },
             {
                 target: '#feature-accessible',
-                title: 'Accessibility Matters ♿',
+                title: 'Accessibility Matters',
                 content: 'Our dark theme maintains WCAG compliance while looking absolutely beautiful.',
                 placement: 'top'
             },
             {
                 target: '#controls-section',
-                title: 'Seamless Integration 🔗',
+                title: 'Seamless Integration',
                 content: 'Dark mode integrates perfectly with your existing design system and brand colors.',
                 placement: 'top'
             }
@@ -936,7 +924,7 @@
         showProgress: true,
         showStepNumbers: true,
         onComplete: () => {
-            showNotification('🌚 Dark theme tour completed! Perfect for modern applications.', 'success');
+            showNotification('Dark theme tour completed! Perfect for modern applications.', 'success');
         }
     };
 
@@ -944,25 +932,25 @@
         steps: [
             {
                 target: '#feature-performance',
-                title: 'Top Positioning 📍',
+                title: 'Top Positioning',
                 content: 'Tooltips can be positioned above elements for maximum visibility.',
                 placement: 'top'
             },
             {
                 target: '#feature-frameworks',
-                title: 'Bottom Positioning 📍',
+                title: 'Bottom Positioning',
                 content: 'Bottom positioning works great for headers and navigation elements.',
                 placement: 'bottom'
             },
             {
                 target: '#demo-mockup',
-                title: 'Left Positioning 📍',
+                title: 'Left Positioning',
                 content: 'Left positioning is perfect for right-aligned content and wide layouts.',
                 placement: 'left'
             },
             {
                 target: '#theme-control',
-                title: 'Right Positioning 📍',
+                title: 'Right Positioning',
                 content: 'Right positioning completes our flexible positioning system.',
                 placement: 'right'
             }
@@ -970,7 +958,7 @@
         theme: currentTheme,
         showProgress: true,
         onComplete: () => {
-            showNotification('🎯 Positioning demo completed! Smart placement for any layout.', 'success');
+            showNotification('Positioning demo completed! Smart placement for any layout.', 'success');
         }
     };
 
@@ -978,31 +966,31 @@
         steps: [
             {
                 target: '#speed-control',
-                title: 'Async Demo Start 🚀',
+                title: 'Async Demo Start',
                 content: 'This demo shows how tours handle complex async operations and error states.',
                 placement: 'top'
             },
             {
                 target: '#dashboard-stats',
-                title: 'Loading Simulation ⏳',
+                title: 'Loading Simulation',
                 content: 'Watch as we simulate a slow API call with proper loading states.',
                 placement: 'bottom',
                 onNext: async () => {
-                    showNotification('⏳ Loading data...', 'info');
+                    showNotification('Loading data...', 'info');
                     await new Promise(resolve => setTimeout(resolve, 3000));
-                    showNotification('✅ Data loaded successfully!', 'success');
+                    showNotification('Data loaded successfully!', 'success');
                 }
             },
             {
                 target: '#interaction-control',
-                title: 'Error Handling 🛡️',
+                title: 'Error Handling',
                 content: 'Production-ready tours gracefully handle errors and edge cases.',
                 placement: 'left'
             }
         ],
         theme: currentTheme,
         onComplete: () => {
-            showNotification('⚡ Async demo completed! Ready for production use.', 'success');
+            showNotification('Async demo completed! Ready for production use.', 'success');
         }
     };
 
@@ -1017,28 +1005,27 @@
     function showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.style.cssText = `
-                position: fixed;
-                top: 2rem;
-                right: 2rem;
-                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-                color: white;
-                padding: 1rem 1.5rem;
-                border-radius: 0.75rem;
-                font-weight: 500;
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-                max-width: 300px;
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            `;
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        `;
 
-        // Add slide-in animation
         const style = document.createElement('style');
         style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-            `;
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
         document.head.appendChild(style);
 
         notification.textContent = message;
@@ -1069,19 +1056,22 @@
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
     document.getElementById('start-basic-tour').addEventListener('click', () => {
+        basicTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(basicTourConfig);
         updateTourStatus(true);
-        basicTour.start();
+        tour.start();
         setTimeout(() => updateTourStatus(false), 1000);
     });
 
     document.getElementById('start-advanced-tour').addEventListener('click', () => {
+        advancedTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(advancedTourConfig);
         updateTourStatus(true);
-        advancedTour.start();
+        tour.start();
         setTimeout(() => updateTourStatus(false), 1000);
     });
 
     document.getElementById('start-dark-tour').addEventListener('click', () => {
-        // Switch to dark theme for demo
         if (currentTheme === 'light') {
             toggleTheme();
         }
@@ -1091,8 +1081,10 @@
     });
 
     document.getElementById('interactive-demo-btn').addEventListener('click', () => {
+        advancedTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(advancedTourConfig);
         updateTourStatus(true);
-        advancedTour.start();
+        tour.start();
         setTimeout(() => updateTourStatus(false), 1000);
     });
 
@@ -1102,23 +1094,26 @@
     });
 
     document.getElementById('toggle-speed').addEventListener('click', () => {
-        currentSpeed = currentSpeed === 'normal' ? 'fast' : 'normal';
-        showNotification(`Animation speed: ${currentSpeed}`, 'info');
+        showNotification('Animation speed toggled', 'info');
     });
 
     document.getElementById('test-positions').addEventListener('click', () => {
+        positioningTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(positioningTourConfig);
         updateTourStatus(true);
-        positioningTour.start();
+        tour.start();
         setTimeout(() => updateTourStatus(false), 1000);
     });
 
     document.getElementById('async-demo').addEventListener('click', () => {
+        asyncDemoConfig.theme = currentTheme;
+        const tour = new GuideMeFast(asyncDemoConfig);
         updateTourStatus(true);
-        asyncTour.start();
+        tour.start();
         setTimeout(() => updateTourStatus(false), 1000);
     });
 
-    // Add some interactive behaviors
+    // Interactive behaviors
     document.querySelectorAll('.feature-card').forEach(card => {
         card.addEventListener('mouseenter', () => {
             card.style.transform = 'translateY(-8px) scale(1.02)';
@@ -1129,7 +1124,7 @@
         });
     });
 
-    // Animate elements on scroll
+    // Animate on scroll
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -1148,26 +1143,12 @@
         observer.observe(el);
     });
 
-    // Add smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-
     // Welcome message
     setTimeout(() => {
-        showNotification('👋 Welcome to GuideMeFast! Try the interactive demos above.', 'info');
+        showNotification('Welcome to GuideMeFast! Try the interactive demos above.', 'info');
     }, 1000);
 
-    // Add keyboard shortcuts
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.key === '1' && e.ctrlKey) {
             e.preventDefault();
@@ -1184,43 +1165,12 @@
         }
     });
 
-    // Add Easter egg
-    let konami = [];
-    const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
-
-    document.addEventListener('keydown', (e) => {
-        konami.push(e.keyCode);
-        if (konami.length > konamiCode.length) {
-            konami.shift();
-        }
-
-        if (konami.join(',') === konamiCode.join(',')) {
-            showNotification('🎉 Konami Code activated! You found the Easter egg!', 'success');
-            // Add some fun effects
-            document.body.style.animation = 'rainbow 2s infinite';
-            setTimeout(() => {
-                document.body.style.animation = '';
-            }, 5000);
-        }
-    });
-
-    // Add rainbow animation for Easter egg
-    const rainbowStyle = document.createElement('style');
-    rainbowStyle.textContent = `
-            @keyframes rainbow {
-                0% { filter: hue-rotate(0deg); }
-                100% { filter: hue-rotate(360deg); }
-            }
-        `;
-    document.head.appendChild(rainbowStyle);
-
-    console.log('🚀 GuideMeFast Demo loaded!');
-    console.log('💡 Keyboard shortcuts:');
+    console.log('GuideMeFast Demo loaded!');
+    console.log('Keyboard shortcuts:');
     console.log('   Ctrl+1 - Basic Tour');
     console.log('   Ctrl+2 - Advanced Tour');
     console.log('   Ctrl+3 - Dark Theme Tour');
     console.log('   Ctrl+T - Toggle Theme');
-    console.log('🥚 Try the Konami code for a surprise!');
 </script>
 </body>
 </html>
