@@ -1,4 +1,3 @@
-// src/index.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import './styles.css';
@@ -52,12 +51,10 @@ const getElementPosition = (selector: string): Position | null => {
     if (!element) return null;
 
     const rect = element.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
     return {
-        top: rect.top + scrollTop,
-        left: rect.left + scrollLeft,
+        top: rect.top,
+        left: rect.left,
         width: rect.width,
         height: rect.height
     };
@@ -109,16 +106,14 @@ const calculateTooltipPosition = (
     // Keep tooltip within viewport
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const scrollTop = window.pageYOffset;
-    const scrollLeft = window.pageXOffset;
 
-    if (left < scrollLeft) left = scrollLeft + 10;
-    if (left + tooltipSize.width > scrollLeft + viewportWidth) {
-        left = scrollLeft + viewportWidth - tooltipSize.width - 10;
+    if (left < 10) left = 10;
+    if (left + tooltipSize.width > viewportWidth - 10) {
+        left = viewportWidth - tooltipSize.width - 10;
     }
-    if (top < scrollTop) top = scrollTop + 10;
-    if (top + tooltipSize.height > scrollTop + viewportHeight) {
-        top = scrollTop + viewportHeight - tooltipSize.height - 10;
+    if (top < 10) top = 10;
+    if (top + tooltipSize.height > viewportHeight - 10) {
+        top = viewportHeight - tooltipSize.height - 10;
     }
 
     return { top, left };
@@ -157,37 +152,73 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
     const isLastStep = currentStep === steps.length - 1;
     const isFirstStep = currentStep === 0;
 
+    // FIXED: Update position function with requestAnimationFrame
+    const updatePosition = useCallback(() => {
+        if (!isOpen || !currentStepData) return;
+
+        const pos = getElementPosition(currentStepData.target);
+        setTargetPosition(pos);
+    }, [isOpen, currentStepData?.target]);
+
     // Handle keyboard events
     useEffect(() => {
         if (!isOpen || !closeOnEscape) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                handleClose();
+                onClose();
             }
         };
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, closeOnEscape]);
+    }, [isOpen, closeOnEscape, onClose]);
 
     // Update position when step changes
     useEffect(() => {
         if (!isOpen || !currentStepData) return;
 
-        const updatePosition = () => {
-            const pos = getElementPosition(currentStepData.target);
-            setTargetPosition(pos);
+        const timer = setTimeout(() => {
+            updatePosition();
+            scrollToElement(currentStepData.target, scrollBehavior);
+        }, 100);
 
-            if (pos) {
-                scrollToElement(currentStepData.target, scrollBehavior);
+        return () => clearTimeout(timer);
+    }, [currentStep, isOpen, currentStepData?.target, scrollBehavior, updatePosition]);
+
+    // CRITICAL FIX: Handle scroll and resize events with requestAnimationFrame
+    useEffect(() => {
+        if (!isOpen) return;
+
+        let rafId: number;
+
+        const scheduleUpdate = () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
             }
+            rafId = requestAnimationFrame(updatePosition);
         };
 
-        // Small delay to ensure DOM is ready
-        const timer = setTimeout(updatePosition, 100);
-        return () => clearTimeout(timer);
-    }, [currentStep, isOpen, currentStepData?.target, scrollBehavior]);
+        const handleScroll = () => {
+            scheduleUpdate();
+        };
+
+        const handleResize = () => {
+            scheduleUpdate();
+        };
+
+        // Add event listeners with passive flag for better performance
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('resize', handleResize, { passive: true });
+
+        return () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [isOpen, updatePosition]);
 
     const handleNext = useCallback(async () => {
         setLoading(true);
@@ -235,10 +266,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
         }
     }, [currentStepData, onSkip, onClose]);
 
-    const handleClose = useCallback(() => {
-        onClose();
-    }, [onClose]);
-
+    // Calculate tooltip position using fixed positioning
     const tooltipPosition = useMemo(() => {
         if (!targetPosition || !currentStepData) return { top: 0, left: 0 };
 
@@ -250,16 +278,18 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
         );
     }, [targetPosition, currentStepData?.placement, currentStepData?.offset, tooltipSize]);
 
+    // FIXED: Calculate highlight style using fixed positioning
     const highlightStyle = useMemo(() => {
-        if (!targetPosition) return {};
+        if (!targetPosition) return { display: 'none' };
 
         return {
-            position: 'absolute' as const,
+            position: 'fixed' as const,
             top: targetPosition.top - highlightPadding,
             left: targetPosition.left - highlightPadding,
             width: targetPosition.width + (highlightPadding * 2),
             height: targetPosition.height + (highlightPadding * 2),
             zIndex: zIndex + 1,
+            pointerEvents: 'none' as const,
             ...customStyles.highlight
         };
     }, [targetPosition, highlightPadding, zIndex, customStyles.highlight]);
@@ -272,14 +302,19 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
             <div
                 className="guidemefast-backdrop"
                 style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
                     opacity: backdropOpacity,
                     zIndex,
                     ...customStyles.backdrop
                 }}
-                onClick={closeOnClickOutside ? handleClose : undefined}
+                onClick={closeOnClickOutside ? onClose : undefined}
             />
 
-            {/* Highlight */}
+            {/* Highlight - FIXED VERSION */}
             {targetPosition && (
                 <div
                     className="guidemefast-highlight"
@@ -291,7 +326,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
             <div
                 className={`guidemefast-tooltip ${currentStepData.customClass || ''}`}
                 style={{
-                    position: 'absolute',
+                    position: 'fixed',
                     top: tooltipPosition.top,
                     left: tooltipPosition.left,
                     zIndex: zIndex + 2,
@@ -309,7 +344,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
                 {/* Close button */}
                 <button
                     className="guidemefast-close"
-                    onClick={handleClose}
+                    onClick={onClose}
                     aria-label="Close tour"
                 >
                     ×

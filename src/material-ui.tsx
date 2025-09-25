@@ -31,10 +31,10 @@ interface MaterialUITourProps {
 }
 
 export const MaterialUITour: React.FC<MaterialUITourProps> = ({
-    isOpen,
-    config,
-    onClose,
-    variant = 'overlay'
+      isOpen,
+      config,
+      onClose,
+      variant = 'overlay'
 }) => {
     const theme = useTheme();
     const [currentStep, setCurrentStep] = React.useState(0);
@@ -45,9 +45,17 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
     const isLastStep = currentStep === steps.length - 1;
     const isFirstStep = currentStep === 0;
 
+    // For overlay variant, use the fixed GuideMeFast component
     if (variant === 'overlay') {
         return <GuideMeFast isOpen={isOpen} config={config} onClose={onClose} />;
     }
+
+    // Reset step when dialog opens
+    React.useEffect(() => {
+        if (isOpen) {
+            setCurrentStep(0);
+        }
+    }, [isOpen]);
 
     const handleNext = async () => {
         setLoading(true);
@@ -95,6 +103,24 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
         }
     };
 
+    // Scroll to element when step changes
+    React.useEffect(() => {
+        if (isOpen && currentStepData?.target) {
+            const timer = setTimeout(() => {
+                const element = document.querySelector(currentStepData.target);
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }
+            }, 200);
+
+            return () => clearTimeout(timer);
+        }
+    }, [currentStep, isOpen, currentStepData?.target]);
+
     return (
         <Dialog
             open={isOpen}
@@ -112,6 +138,11 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
             }}
             TransitionComponent={Fade}
             transitionDuration={300}
+            sx={{
+                '& .MuiDialog-container': {
+                    zIndex: 10000,
+                },
+            }}
         >
             {/* Header */}
             <Box sx={{ p: 2, pb: 0 }}>
@@ -144,6 +175,7 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
                                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
                                 '& .MuiLinearProgress-bar': {
                                     borderRadius: 2,
+                                    transition: 'transform 0.3s ease',
                                 }
                             }}
                         />
@@ -153,23 +185,27 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
 
             {/* Content */}
             <DialogContent sx={{ pt: 2 }}>
-                {currentStepData?.title && (
-                    <Typography
-                        variant="h6"
-                        component="h2"
-                        gutterBottom
-                        sx={{ fontWeight: 600 }}
-                    >
-                        {currentStepData.title}
-                    </Typography>
-                )}
-                <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ lineHeight: 1.6 }}
-                >
-                    {currentStepData?.content}
-                </Typography>
+                <Fade in={true} key={currentStep} timeout={300}>
+                    <Box>
+                        {currentStepData?.title && (
+                            <Typography
+                                variant="h6"
+                                component="h2"
+                                gutterBottom
+                                sx={{ fontWeight: 600 }}
+                            >
+                                {currentStepData.title}
+                            </Typography>
+                        )}
+                        <Typography
+                            variant="body1"
+                            color="text.secondary"
+                            sx={{ lineHeight: 1.6 }}
+                        >
+                            {currentStepData?.content}
+                        </Typography>
+                    </Box>
+                </Fade>
             </DialogContent>
 
             {/* Actions */}
@@ -185,27 +221,29 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
                     </Button>
                 )}
 
-                {!isFirstStep && currentStepData?.showPrev !== false && (
-                    <Button
-                        onClick={handlePrev}
-                        disabled={loading}
-                        startIcon={<PrevIcon />}
-                        variant="outlined"
-                    >
-                        Previous
-                    </Button>
-                )}
+                <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
+                    {!isFirstStep && currentStepData?.showPrev !== false && (
+                        <Button
+                            onClick={handlePrev}
+                            disabled={loading}
+                            startIcon={<PrevIcon />}
+                            variant="outlined"
+                        >
+                            Previous
+                        </Button>
+                    )}
 
-                {currentStepData?.showNext !== false && (
-                    <Button
-                        onClick={handleNext}
-                        disabled={loading}
-                        variant="contained"
-                        endIcon={isLastStep ? <CheckIcon /> : <NextIcon />}
-                    >
-                        {loading ? 'Loading...' : (isLastStep ? 'Finish' : 'Next')}
-                    </Button>
-                )}
+                    {currentStepData?.showNext !== false && (
+                        <Button
+                            onClick={handleNext}
+                            disabled={loading}
+                            variant="contained"
+                            endIcon={isLastStep ? <CheckIcon /> : <NextIcon />}
+                        >
+                            {loading ? 'Loading...' : (isLastStep ? 'Finish' : 'Next')}
+                        </Button>
+                    )}
+                </Box>
             </DialogActions>
         </Dialog>
     );

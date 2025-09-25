@@ -1,0 +1,32 @@
+# Source files
+src/
+examples/
+docs/
+scripts/
+
+# Build tools
+rollup.config.js
+tsconfig.json
+jest.config.js
+.eslintrc.js
+
+# Development files
+*.test.*
+*.spec.*
+.coverage/
+.nyc_output/
+
+# Git files
+.git/
+.gitignore
+
+# Logs and caches
+*.log
+npm-debug.log*
+node_modules/
+.npm/
+.eslintcache
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuideMeFast - Interactive Demo | Modern Tour Library</title>
+    <!-- Link to the fixed styles -->
+    <link rel="stylesheet" href="../src/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Demo page specific styles */
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --border: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .header {
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--gradient-hero);
+            color: white;
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100px); }
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Demo Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .btn-accent {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 5rem 0;
+            background: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            padding: 5rem 0;
+            background: var(--bg-primary);
+        }
+
+        .demo-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .demo-text h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .demo-text p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .demo-mockup {
+            position: relative;
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+        }
+
+        .mockup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mockup-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .mockup-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .mockup-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .mockup-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mockup-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .mockup-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Controls Section */
+        .controls-section {
+            padding: 3rem 0;
+            background: var(--bg-tertiary);
+            text-align: center;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .control-card {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .control-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .control-label {
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-content {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            z-index: 200;
+            transition: all 0.2s ease;
+        }
+
+        .status-indicator.active {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .demo-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .mockup-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .fade-in:nth-child(2) { animation-delay: 0.1s; }
+        .fade-in:nth-child(3) { animation-delay: 0.2s; }
+        .fade-in:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Status Indicator -->
+<div class="status-indicator" id="tour-status">
+    <i class="fas fa-circle"></i> Tour Ready
+</div>
+
+<!-- Header -->
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <i class="fas fa-route"></i> GuideMeFast
+        </div>
+        <div class="nav-actions">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+</header>
+
+<!-- Hero Section -->
+<section class="hero" id="hero-section">
+    <div class="hero-content">
+        <h1>Transform User Onboarding</h1>
+        <p>Create beautiful, interactive guided tours that engage users and increase product adoption. GuideMeFast makes complex features feel simple.</p>
+        <div class="hero-buttons">
+            <button class="btn btn-primary" id="start-basic-tour">
+                <i class="fas fa-play"></i> Start Basic Tour
+            </button>
+            <button class="btn btn-secondary" id="start-advanced-tour">
+                <i class="fas fa-magic"></i> Advanced Demo
+            </button>
+            <button class="btn btn-accent" id="start-dark-tour">
+                <i class="fas fa-moon"></i> Dark Theme
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Why Choose GuideMeFast?</h2>
+            <p class="section-subtitle">Built for modern web applications with performance and user experience in mind.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card fade-in" id="feature-performance">
+                <div class="feature-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3 class="feature-title">Lightning Fast</h3>
+                <p class="feature-description">Under 15KB gzipped with zero dependencies. Optimized for 60fps animations and instant loading.</p>
+            </div>
+
+            <div class="feature-card fade-in" id="feature-frameworks">
+                <div class="feature-icon">
+                    <i class="fab fa-react"></i>
+                </div>
+                <h3 class="feature-title">Framework Agnostic</h3>
+                <p class="feature-description">Works with React, Vue, Angular, or vanilla JavaScript. TypeScript support included.</p>
+            </div>
+
+            <div class="feature-card fade-in" id="feature-accessible">
+                <div class="feature-icon">
+                    <i class="fas fa-universal-access"></i>
+                </div>
+                <h3 class="feature-title">Accessibility First</h3>
+                <p class="feature-description">WCAG 2.1 AA compliant with keyboard navigation, screen reader support, and high contrast mode.</p>
+            </div>
+
+            <div class="feature-card fade-in" id="feature-responsive">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="feature-title">Mobile Optimized</h3>
+                <p class="feature-description">Touch-friendly controls and responsive design that works perfectly on any device.</p>
+            </div>
+
+            <div class="feature-card fade-in" id="feature-customizable">
+                <div class="feature-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <h3 class="feature-title">Highly Customizable</h3>
+                <p class="feature-description">Three built-in themes plus unlimited custom styling options to match your brand.</p>
+            </div>
+
+            <div class="feature-card fade-in" id="feature-analytics">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">Analytics Ready</h3>
+                <p class="feature-description">Built-in event tracking and completion metrics to optimize your user onboarding flow.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Demo Section -->
+<section class="demo-section">
+    <div class="container">
+        <div class="demo-content">
+            <div class="demo-text">
+                <h2>See It in Action</h2>
+                <p>Experience how GuideMeFast can transform your application's user experience. Interactive tours guide users through complex workflows while maintaining engagement.</p>
+                <p>Each tour step can include async operations, custom validations, and dynamic content that responds to user actions.</p>
+                <button class="btn btn-accent" id="interactive-demo-btn">
+                    <i class="fas fa-eye"></i> Try Interactive Demo
+                </button>
+            </div>
+
+            <div class="demo-mockup" id="dashboard-mockup">
+                <div class="mockup-header">
+                    <h3 class="mockup-title" id="dashboard-title">Analytics Dashboard</h3>
+                    <button class="btn btn-primary" id="refresh-data">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="mockup-stats" id="dashboard-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">2,847</span>
+                        <span class="stat-label">Active Users</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">94%</span>
+                        <span class="stat-label">Completion Rate</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4.8</span>
+                        <span class="stat-label">User Rating</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">156</span>
+                        <span class="stat-label">Tours Created</span>
+                    </div>
+                </div>
+
+                <div class="mockup-actions" id="dashboard-actions">
+                    <button class="mockup-btn primary">Create Tour</button>
+                    <button class="mockup-btn">Export Data</button>
+                    <button class="mockup-btn">Settings</button>
+                    <button class="mockup-btn">Help</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Controls Section -->
+<section class="controls-section">
+    <div class="container">
+        <h2 class="section-title">Customize Your Experience</h2>
+        <div class="controls-grid">
+            <div class="control-card" id="theme-control">
+                <div class="control-label">
+                    <i class="fas fa-paint-brush"></i> Theme
+                </div>
+                <button class="btn btn-secondary" id="cycle-theme">Switch Theme</button>
+            </div>
+            <div class="control-card" id="speed-control">
+                <div class="control-label">
+                    <i class="fas fa-tachometer-alt"></i> Animation Speed
+                </div>
+                <button class="btn btn-secondary" id="toggle-speed">Toggle Speed</button>
+            </div>
+            <div class="control-card" id="position-control">
+                <div class="control-label">
+                    <i class="fas fa-arrows-alt"></i> Positioning
+                </div>
+                <button class="btn btn-secondary" id="test-positions">Test All Positions</button>
+            </div>
+            <div class="control-card" id="interaction-control">
+                <div class="control-label">
+                    <i class="fas fa-mouse-pointer"></i> Interactions
+                </div>
+                <button class="btn btn-secondary" id="async-demo">Async Demo</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-links">
+            <a href="https://www.npmjs.com/package/guidemefast" class="footer-link">Documentation</a>
+            <a href="https://github.com/eckopage/GuideMeFast" class="footer-link">GitHub</a>
+            <a href="https://www.npmjs.com/package/guidemefast" class="footer-link">NPM Package</a>
+            <a href="https://github.com/eckopage/GuideMeFast/tree/main/examples" class="footer-link">Examples</a>
+        </div>
+        <div class="footer-content">
+            <p>&copy; 2024 GuideMeFast. Built with love for developers.</p>
+            <p>Open source • TypeScript • Framework agnostic</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Use CDN build for demo -->
+<script src="../dist/guidemefast.min.js"></script>
+<script>
+    // Theme management
+    let currentTheme = 'light';
+
+    function toggleTheme() {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        const themeIcon = document.querySelector('#theme-toggle i');
+        themeIcon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    // Tour configurations with updated themes
+    const basicTourConfig = {
+        steps: [
+            {
+                target: '#hero-section',
+                title: 'Welcome to GuideMeFast!',
+                content: 'This is where your user journey begins. Great onboarding starts with a compelling introduction that sets expectations and builds excitement.',
+                placement: 'bottom'
+            },
+            {
+                target: '#feature-performance',
+                title: 'Lightning Fast Performance',
+                content: 'Performance matters. GuideMeFast is optimized for speed with under 15KB bundle size and 60fps animations.',
+                placement: 'bottom'
+            },
+            {
+                target: '#feature-frameworks',
+                title: 'Works Everywhere',
+                content: 'Use with any framework or vanilla JavaScript. React, Vue, Angular - we support them all with TypeScript included.',
+                placement: 'left'
+            },
+            {
+                target: '#dashboard-mockup',
+                title: 'Interactive Elements',
+                content: 'Tours can interact with your actual application components, making the experience feel natural and engaging.',
+                placement: 'right'
+            }
+        ],
+        theme: currentTheme,
+        showProgress: true,
+        showStepNumbers: true,
+        onComplete: () => {
+            showNotification('Basic tour completed! You\'re ready to create amazing user experiences.', 'success');
+        },
+        onSkip: () => {
+            showNotification('Tour skipped. You can restart it anytime!', 'info');
+        }
+    };
+
+    const advancedTourConfig = {
+        steps: [
+            {
+                target: '#dashboard-title',
+                title: 'Advanced Features Demo',
+                content: 'This tour showcases advanced GuideMeFast capabilities including async operations and dynamic content.',
+                placement: 'bottom'
+            },
+            {
+                target: '#refresh-data',
+                title: 'Async Operations',
+                content: 'Watch as we simulate loading new data. Tours can handle async operations seamlessly.',
+                placement: 'left',
+                onNext: async () => {
+                    const refreshBtn = document.getElementById('refresh-data');
+                    const originalText = refreshBtn.innerHTML;
+                    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                    refreshBtn.disabled = true;
+
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    const stats = document.querySelectorAll('.stat-number');
+                    stats[0].textContent = '3,124';
+                    stats[1].textContent = '96%';
+                    stats[2].textContent = '4.9';
+                    stats[3].textContent = '203';
+
+                    refreshBtn.innerHTML = originalText;
+                    refreshBtn.disabled = false;
+                }
+            },
+            {
+                target: '#dashboard-stats',
+                title: 'Dynamic Content Updates',
+                content: 'Notice how the statistics changed! Tours can trigger real application logic and show users the results.',
+                placement: 'top'
+            },
+            {
+                target: '#dashboard-actions',
+                title: 'Interactive Workflows',
+                content: 'Guide users through complex workflows by combining tours with your application\'s functionality.',
+                placement: 'bottom'
+            },
+            {
+                target: '#theme-control',
+                title:                 'Theme Customization',
+                content: 'Tours automatically adapt to your application\'s theme changes, maintaining visual consistency.',
+                placement: 'right',
+                onNext: () => {
+                    const originalTheme = currentTheme;
+                    toggleTheme();
+                    setTimeout(() => {
+                        if (currentTheme !== originalTheme) {
+                            toggleTheme();
+                        }
+                    }, 1500);
+                }
+            }
+        ],
+        theme: currentTheme,
+        backdropOpacity: 0.8,
+        showProgress: true,
+        onComplete: () => {
+            showNotification('Advanced demo completed! You\'ve seen the power of interactive tours.', 'success');
+        }
+    };
+
+    const darkTourConfig = {
+        steps: [
+            {
+                target: '#theme-toggle',
+                title: 'Dark Mode Excellence',
+                content: 'GuideMeFast looks stunning in dark mode with carefully crafted contrast and accessibility.',
+                placement: 'bottom'
+            },
+            {
+                target: '#feature-accessible',
+                title: 'Accessibility Matters',
+                content: 'Our dark theme maintains WCAG compliance while looking absolutely beautiful.',
+                placement: 'top'
+            },
+            {
+                target: '#controls-section',
+                title: 'Seamless Integration',
+                content: 'Dark mode integrates perfectly with your existing design system and brand colors.',
+                placement: 'top'
+            }
+        ],
+        theme: 'dark',
+        showProgress: true,
+        showStepNumbers: true,
+        onComplete: () => {
+            showNotification('Dark theme tour completed! Perfect for modern applications.', 'success');
+        }
+    };
+
+    const positioningTourConfig = {
+        steps: [
+            {
+                target: '#feature-performance',
+                title: 'Top Positioning',
+                content: 'Tooltips can be positioned above elements for maximum visibility.',
+                placement: 'top'
+            },
+            {
+                target: '#feature-frameworks',
+                title: 'Bottom Positioning',
+                content: 'Bottom positioning works great for headers and navigation elements.',
+                placement: 'bottom'
+            },
+            {
+                target: '#demo-mockup',
+                title: 'Left Positioning',
+                content: 'Left positioning is perfect for right-aligned content and wide layouts.',
+                placement: 'left'
+            },
+            {
+                target: '#theme-control',
+                title: 'Right Positioning',
+                content: 'Right positioning completes our flexible positioning system.',
+                placement: 'right'
+            }
+        ],
+        theme: currentTheme,
+        showProgress: true,
+        onComplete: () => {
+            showNotification('Positioning demo completed! Smart placement for any layout.', 'success');
+        }
+    };
+
+    const asyncDemoConfig = {
+        steps: [
+            {
+                target: '#speed-control',
+                title: 'Async Demo Start',
+                content: 'This demo shows how tours handle complex async operations and error states.',
+                placement: 'top'
+            },
+            {
+                target: '#dashboard-stats',
+                title: 'Loading Simulation',
+                content: 'Watch as we simulate a slow API call with proper loading states.',
+                placement: 'bottom',
+                onNext: async () => {
+                    showNotification('Loading data...', 'info');
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    showNotification('Data loaded successfully!', 'success');
+                }
+            },
+            {
+                target: '#interaction-control',
+                title: 'Error Handling',
+                content: 'Production-ready tours gracefully handle errors and edge cases.',
+                placement: 'left'
+            }
+        ],
+        theme: currentTheme,
+        onComplete: () => {
+            showNotification('Async demo completed! Ready for production use.', 'success');
+        }
+    };
+
+    // Initialize tours
+    const basicTour = new GuideMeFast(basicTourConfig);
+    const advancedTour = new GuideMeFast(advancedTourConfig);
+    const darkTour = new GuideMeFast(darkTourConfig);
+    const positioningTour = new GuideMeFast(positioningTourConfig);
+    const asyncTour = new GuideMeFast(asyncDemoConfig);
+
+    // Utility functions
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        `;
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    function updateTourStatus(isActive) {
+        const statusIndicator = document.getElementById('tour-status');
+        if (isActive) {
+            statusIndicator.innerHTML = '<i class="fas fa-circle"></i> Tour Active';
+            statusIndicator.classList.add('active');
+        } else {
+            statusIndicator.innerHTML = '<i class="fas fa-circle"></i> Tour Ready';
+            statusIndicator.classList.remove('active');
+        }
+    }
+
+    // Event listeners
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+    document.getElementById('start-basic-tour').addEventListener('click', () => {
+        basicTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(basicTourConfig);
+        updateTourStatus(true);
+        tour.start();
+        setTimeout(() => updateTourStatus(false), 1000);
+    });
+
+    document.getElementById('start-advanced-tour').addEventListener('click', () => {
+        advancedTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(advancedTourConfig);
+        updateTourStatus(true);
+        tour.start();
+        setTimeout(() => updateTourStatus(false), 1000);
+    });
+
+    document.getElementById('start-dark-tour').addEventListener('click', () => {
+        if (currentTheme === 'light') {
+            toggleTheme();
+        }
+        updateTourStatus(true);
+        darkTour.start();
+        setTimeout(() => updateTourStatus(false), 1000);
+    });
+
+    document.getElementById('interactive-demo-btn').addEventListener('click', () => {
+        advancedTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(advancedTourConfig);
+        updateTourStatus(true);
+        tour.start();
+        setTimeout(() => updateTourStatus(false), 1000);
+    });
+
+    document.getElementById('cycle-theme').addEventListener('click', () => {
+        toggleTheme();
+        showNotification(`Switched to ${currentTheme} theme`, 'info');
+    });
+
+    document.getElementById('toggle-speed').addEventListener('click', () => {
+        showNotification('Animation speed toggled', 'info');
+    });
+
+    document.getElementById('test-positions').addEventListener('click', () => {
+        positioningTourConfig.theme = currentTheme;
+        const tour = new GuideMeFast(positioningTourConfig);
+        updateTourStatus(true);
+        tour.start();
+        setTimeout(() => updateTourStatus(false), 1000);
+    });
+
+    document.getElementById('async-demo').addEventListener('click', () => {
+        asyncDemoConfig.theme = currentTheme;
+        const tour = new GuideMeFast(asyncDemoConfig);
+        updateTourStatus(true);
+        tour.start();
+        setTimeout(() => updateTourStatus(false), 1000);
+    });
+
+    // Interactive behaviors
+    document.querySelectorAll('.feature-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Animate on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Welcome message
+    setTimeout(() => {
+        showNotification('Welcome to GuideMeFast! Try the interactive demos above.', 'info');
+    }, 1000);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '1' && e.ctrlKey) {
+            e.preventDefault();
+            document.getElementById('start-basic-tour').click();
+        } else if (e.key === '2' && e.ctrlKey) {
+            e.preventDefault();
+            document.getElementById('start-advanced-tour').click();
+        } else if (e.key === '3' && e.ctrlKey) {
+            e.preventDefault();
+            document.getElementById('start-dark-tour').click();
+        } else if (e.key === 't' && e.ctrlKey) {
+            e.preventDefault();
+            toggleTheme();
+        }
+    });
+
+    console.log('GuideMeFast Demo loaded!');
+    console.log('Keyboard shortcuts:');
+    console.log('   Ctrl+1 - Basic Tour');
+    console.log('   Ctrl+2 - Advanced Tour');
+    console.log('   Ctrl+3 - Dark Theme Tour');
+    console.log('   Ctrl+T - Toggle Theme');
+</script>
+</body>
+</html>
