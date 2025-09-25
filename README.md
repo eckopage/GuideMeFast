@@ -1,5 +1,8 @@
 # 🚀 GuideMeFast
 
+Beautiful, lightweight library for creating interactive guided tours in web applications. A modern, feature-rich alternative to Intro.js with full React and Material-UI support.
+
+
 [![npm version](https://badge.fury.io/js/guidemefast.svg)](https://badge.fury.io/js/guidemefast)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
@@ -8,8 +11,6 @@
 <p align="center">
     <img src="public/image1.png" alt="drawing" style="width:500px;"/>
 </p>
-
-Beautiful, lightweight library for creating interactive guided tours in web applications. A modern, feature-rich alternative to Intro.js with full React and Material-UI support.
 
 ## ✨ Features
 
