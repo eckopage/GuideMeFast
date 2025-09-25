@@ -1,6 +1,6 @@
 {
   "name": "guidemefast",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "module",
   "description": "Beautiful, lightweight library for creating interactive guided tours in web applications",
   "main": "dist/index.js",
