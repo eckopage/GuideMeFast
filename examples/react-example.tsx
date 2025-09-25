@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGuideMeFast, TourConfig } from 'guidemefast';
+import { useGuideMeFast, TourConfig } from '../src';
 import { useMaterialUITour } from '../dist/material-ui';
 import { Button, Card, CardContent, Typography, Box, AppBar, Toolbar } from '@mui/material';
 import 'guidemefast/dist/index.css';

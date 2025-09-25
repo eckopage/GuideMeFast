@@ -1,4 +1,6 @@
-/* GuideMeFast Styles */
+/* GuideMeFast - Complete Styles with Scrolling Fixes */
+
+/* Base overlay styles - FIXED for scrolling */
 .guidemefast-overlay {
     position: fixed;
     top: 0;
@@ -6,11 +8,13 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
+    z-index: 9999;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
+/* Backdrop - FIXED positioning */
 .guidemefast-backdrop {
-    position: fixed;
+    position: fixed !important;
     top: 0;
     left: 0;
     width: 100%;
@@ -18,9 +22,12 @@
     background: rgba(0, 0, 0, 0.7);
     pointer-events: all;
     transition: opacity 0.3s ease;
+    z-index: 9999;
 }
 
+/* Highlight - CRITICAL FIX for scrolling issues */
 .guidemefast-highlight {
+    position: fixed !important;
     border-radius: 8px;
     box-shadow:
             0 0 0 4px rgba(255, 255, 255, 0.2),
@@ -30,6 +37,10 @@
     transition: all 0.3s ease;
     pointer-events: none;
     animation: guidemefast-pulse 2s infinite;
+    z-index: 10000;
+    /* Performance optimizations */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 @keyframes guidemefast-pulse {
@@ -47,7 +58,9 @@
     }
 }
 
+/* Tooltip - FIXED positioning */
 .guidemefast-tooltip {
+    position: fixed !important;
     min-width: 280px;
     max-width: 400px;
     background: white;
@@ -57,9 +70,12 @@
             0 8px 16px rgba(0, 0, 0, 0.1);
     padding: 0;
     pointer-events: all;
-    position: relative;
     animation: guidemefast-tooltip-enter 0.3s ease-out;
     border: 1px solid rgba(0, 0, 0, 0.08);
+    z-index: 10001;
+    /* Performance optimizations */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 @keyframes guidemefast-tooltip-enter {
@@ -73,6 +89,7 @@
     }
 }
 
+/* Close button */
 .guidemefast-close {
     position: absolute;
     top: 12px;
@@ -97,6 +114,12 @@
     color: #333;
 }
 
+.guidemefast-close:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* Progress indicator */
 .guidemefast-progress {
     position: absolute;
     top: 0;
@@ -114,6 +137,7 @@
     transition: width 0.3s ease;
 }
 
+/* Step counter */
 .guidemefast-step-counter {
     position: absolute;
     top: 12px;
@@ -126,6 +150,7 @@
     border-radius: 12px;
 }
 
+/* Content */
 .guidemefast-content {
     padding: 40px 24px 24px;
 }
@@ -145,6 +170,7 @@
     font-size: 14px;
 }
 
+/* Navigation */
 .guidemefast-navigation {
     padding: 0 24px 24px;
     display: flex;
@@ -153,6 +179,7 @@
     justify-content: flex-end;
 }
 
+/* Buttons */
 .guidemefast-btn {
     padding: 8px 16px;
     border-radius: 8px;
@@ -171,6 +198,11 @@
 .guidemefast-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.guidemefast-btn:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
 }
 
 .guidemefast-btn-primary {
@@ -249,6 +281,17 @@
 }
 
 /* Dark theme */
+.guidemefast-theme-dark .guidemefast-backdrop {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.guidemefast-theme-dark .guidemefast-highlight {
+    box-shadow:
+            0 0 0 4px rgba(129, 140, 248, 0.3),
+            0 0 0 2px rgba(129, 140, 248, 0.5),
+            0 0 20px rgba(129, 140, 248, 0.4);
+}
+
 .guidemefast-theme-dark .guidemefast-tooltip {
     background: #2d3748;
     color: white;
@@ -279,6 +322,10 @@
 
 .guidemefast-theme-dark .guidemefast-progress {
     background: rgba(255, 255, 255, 0.1);
+}
+
+.guidemefast-theme-dark .guidemefast-progress-bar {
+    background: linear-gradient(90deg, #818cf8 0%, #a78bfa 100%);
 }
 
 .guidemefast-theme-dark .guidemefast-btn-secondary {
@@ -327,11 +374,20 @@
 }
 
 .guidemefast-theme-material .guidemefast-btn-primary:hover:not(:disabled) {
+    background: #1565c0;
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .guidemefast-theme-material .guidemefast-progress-bar {
     background: #1976d2;
+}
+
+.guidemefast-theme-material .guidemefast-highlight {
+    border-radius: 4px;
+    box-shadow:
+            0 0 0 4px rgba(25, 118, 210, 0.3),
+            0 0 0 2px rgba(25, 118, 210, 0.5),
+            0 0 20px rgba(25, 118, 210, 0.4);
 }
 
 /* Responsive design */
@@ -359,6 +415,14 @@
     .guidemefast-step-counter {
         font-size: 11px;
     }
+
+    /* Mobile highlight adjustments */
+    .guidemefast-highlight {
+        box-shadow:
+                0 0 0 2px rgba(255, 255, 255, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.5),
+                0 0 15px rgba(255, 255, 255, 0.4);
+    }
 }
 
 @media (max-width: 480px) {
@@ -375,6 +439,13 @@
     .guidemefast-btn-ghost {
         order: -1;
         margin-bottom: 8px;
+        margin-right: 0;
+    }
+
+    .guidemefast-tooltip {
+        min-width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+        margin: 16px;
     }
 }
 
@@ -389,6 +460,27 @@
     animation: guidemefast-shake 0.5s ease-in-out;
 }
 
+.guidemefast-fade-in {
+    animation: guidemefast-fade-in 0.3s ease-out;
+}
+
+@keyframes guidemefast-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Accessibility improvements */
+.guidemefast-tooltip:focus-within {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: more) {
     .guidemefast-tooltip {
@@ -396,9 +488,15 @@
     }
 
     .guidemefast-highlight {
+        border: 3px solid #000;
+        background-color: rgba(255, 255, 0, 0.3);
         box-shadow:
-                0 0 0 4px currentColor,
-                0 0 0 6px white;
+                0 0 0 6px currentColor,
+                0 0 0 8px white;
+    }
+
+    .guidemefast-btn {
+        border: 2px solid;
     }
 }
 
@@ -419,4 +517,120 @@
     .guidemefast-progress-bar {
         transition: none;
     }
+
+    .guidemefast-backdrop {
+        transition: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .guidemefast-overlay,
+    .guidemefast-backdrop,
+    .guidemefast-highlight,
+    .guidemefast-tooltip {
+        display: none !important;
+    }
+}
+
+/* Safari backdrop-filter support */
+@supports (-webkit-backdrop-filter: blur(1px)) {
+    .guidemefast-tooltip {
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .guidemefast-theme-dark .guidemefast-tooltip {
+        background: rgba(45, 55, 72, 0.9);
+    }
+}
+
+/* Ensure proper stacking context */
+.guidemefast-overlay * {
+    position: relative;
+}
+
+/* Loading state styles */
+.guidemefast-btn.guidemefast-loading {
+    pointer-events: none;
+    position: relative;
+}
+
+.guidemefast-btn.guidemefast-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: guidemefast-spin 1s linear infinite;
+}
+
+@keyframes guidemefast-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error state styles */
+.guidemefast-error .guidemefast-tooltip {
+    border-color: #ef4444;
+    box-shadow:
+            0 20px 40px rgba(239, 68, 68, 0.15),
+            0 8px 16px rgba(239, 68, 68, 0.1);
+}
+
+.guidemefast-error .guidemefast-title {
+    color: #ef4444;
+}
+
+/* Success state styles */
+.guidemefast-success .guidemefast-tooltip {
+    border-color: #10b981;
+    box-shadow:
+            0 20px 40px rgba(16, 185, 129, 0.15),
+            0 8px 16px rgba(16, 185, 129, 0.1);
+}
+
+.guidemefast-success .guidemefast-title {
+    color: #10b981;
+}
+
+/* Custom positioning utilities */
+.guidemefast-tooltip.guidemefast-top-left {
+    transform-origin: bottom left;
+}
+
+.guidemefast-tooltip.guidemefast-top-right {
+    transform-origin: bottom right;
+}
+
+.guidemefast-tooltip.guidemefast-bottom-left {
+    transform-origin: top left;
+}
+
+.guidemefast-tooltip.guidemefast-bottom-right {
+    transform-origin: top right;
+}
+
+/* RTL support */
+[dir="rtl"] .guidemefast-close {
+    right: auto;
+    left: 12px;
+}
+
+[dir="rtl"] .guidemefast-step-counter {
+    left: auto;
+    right: 16px;
+}
+
+[dir="rtl"] .guidemefast-navigation {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .guidemefast-btn-ghost {
+    margin-right: 0;
+    margin-left: auto;
 }

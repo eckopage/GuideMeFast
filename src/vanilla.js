@@ -23,14 +23,17 @@ class GuideMeFast {
         this.isActive = false;
         this.elements = {};
         this.loading = false;
+        this.rafId = null;
 
         // Bind methods
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleResize = this.handleResize.bind(this);
+        this.handleScroll = this.handleScroll.bind(this);
         this.handleNext = this.handleNext.bind(this);
         this.handlePrev = this.handlePrev.bind(this);
         this.handleSkip = this.handleSkip.bind(this);
         this.handleClose = this.handleClose.bind(this);
+        this.updatePositions = this.updatePositions.bind(this);
     }
 
     // Public API
@@ -51,6 +54,11 @@ class GuideMeFast {
         this.removeEventListeners();
         this.removeElements();
         this.currentStep = 0;
+
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
     }
 
     next() {
@@ -78,27 +86,41 @@ class GuideMeFast {
         this.elements.overlay = document.createElement('div');
         this.elements.overlay.className = `guidemefast-overlay guidemefast-theme-${this.config.theme}`;
 
-        // Create backdrop
+        // Create backdrop - FIXED: Use fixed positioning
         this.elements.backdrop = document.createElement('div');
         this.elements.backdrop.className = 'guidemefast-backdrop';
-        this.elements.backdrop.style.zIndex = this.config.zIndex;
-        this.elements.backdrop.style.opacity = this.config.backdropOpacity;
+        this.elements.backdrop.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: ${this.config.zIndex};
+            opacity: ${this.config.backdropOpacity};
+        `;
         Object.assign(this.elements.backdrop.style, this.config.customStyles.backdrop || {});
 
         if (this.config.closeOnClickOutside) {
             this.elements.backdrop.addEventListener('click', this.handleClose);
         }
 
-        // Create highlight
+        // Create highlight - FIXED: Use fixed positioning
         this.elements.highlight = document.createElement('div');
         this.elements.highlight.className = 'guidemefast-highlight';
-        this.elements.highlight.style.zIndex = this.config.zIndex + 1;
+        this.elements.highlight.style.cssText = `
+            position: fixed;
+            z-index: ${this.config.zIndex + 1};
+            pointer-events: none;
+        `;
         Object.assign(this.elements.highlight.style, this.config.customStyles.highlight || {});
 
-        // Create tooltip
+        // Create tooltip - FIXED: Use fixed positioning
         this.elements.tooltip = document.createElement('div');
         this.elements.tooltip.className = 'guidemefast-tooltip';
-        this.elements.tooltip.style.zIndex = this.config.zIndex + 2;
+        this.elements.tooltip.style.cssText = `
+            position: fixed;
+            z-index: ${this.config.zIndex + 2};
+        `;
         Object.assign(this.elements.tooltip.style, this.config.customStyles.tooltip || {});
 
         // Create tooltip content
@@ -163,36 +185,85 @@ class GuideMeFast {
         const step = this.config.steps[this.currentStep];
         if (!step) return;
 
-        // Update target position and highlight
-        this.updateHighlight(step.target);
-
-        // Update tooltip content
+        // Update tooltip content first
         this.updateTooltipContent(step);
 
-        // Update tooltip position
-        this.updateTooltipPosition(step);
+        // Then update positions
+        this.updatePositions();
 
         // Scroll to element if needed
         this.scrollToElement(step.target);
     }
 
+    // FIXED: More efficient position update with requestAnimationFrame
+    updatePositions() {
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+        }
+
+        this.rafId = requestAnimationFrame(() => {
+            const step = this.config.steps[this.currentStep];
+            if (!step) return;
+
+            this.updateHighlight(step.target);
+            this.updateTooltip(step);
+        });
+    }
+
+    // FIXED: Use getBoundingClientRect for viewport-relative positioning
     updateHighlight(target) {
         const element = document.querySelector(target);
-        if (!element) return;
+        if (!element) {
+            this.elements.highlight.style.display = 'none';
+            return;
+        }
 
         const rect = element.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
+        // Use fixed positioning based on viewport coordinates
         const highlightStyle = {
-            position: 'absolute',
-            top: (rect.top + scrollTop - this.config.highlightPadding) + 'px',
-            left: (rect.left + scrollLeft - this.config.highlightPadding) + 'px',
+            display: 'block',
+            position: 'fixed',
+            top: (rect.top - this.config.highlightPadding) + 'px',
+            left: (rect.left - this.config.highlightPadding) + 'px',
             width: (rect.width + this.config.highlightPadding * 2) + 'px',
             height: (rect.height + this.config.highlightPadding * 2) + 'px'
         };
 
         Object.assign(this.elements.highlight.style, highlightStyle);
+    }
+
+    // FIXED: Simplified tooltip positioning
+    updateTooltip(step) {
+        const target = document.querySelector(step.target);
+        if (!target) return;
+
+        const targetRect = target.getBoundingClientRect();
+        const tooltipRect = this.elements.tooltip.getBoundingClientRect();
+
+        const targetPos = {
+            top: targetRect.top,
+            left: targetRect.left,
+            width: targetRect.width,
+            height: targetRect.height
+        };
+
+        const tooltipSize = {
+            width: tooltipRect.width || 320,
+            height: tooltipRect.height || 200
+        };
+
+        const position = this.calculateTooltipPosition(
+            targetPos,
+            step.placement || 'top',
+            tooltipSize,
+            step.offset || { x: 0, y: 0 }
+        );
+
+        // Use fixed positioning
+        this.elements.tooltip.style.position = 'fixed';
+        this.elements.tooltip.style.top = position.top + 'px';
+        this.elements.tooltip.style.left = position.left + 'px';
     }
 
     updateTooltipContent(step) {
@@ -249,39 +320,6 @@ class GuideMeFast {
         }
     }
 
-    updateTooltipPosition(step) {
-        const target = document.querySelector(step.target);
-        if (!target) return;
-
-        const targetRect = target.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-
-        const targetPos = {
-            top: targetRect.top + scrollTop,
-            left: targetRect.left + scrollLeft,
-            width: targetRect.width,
-            height: targetRect.height
-        };
-
-        const tooltipRect = this.elements.tooltip.getBoundingClientRect();
-        const tooltipSize = {
-            width: tooltipRect.width || 320,
-            height: tooltipRect.height || 200
-        };
-
-        const position = this.calculateTooltipPosition(
-            targetPos,
-            step.placement || 'top',
-            tooltipSize,
-            step.offset || { x: 0, y: 0 }
-        );
-
-        this.elements.tooltip.style.position = 'absolute';
-        this.elements.tooltip.style.top = position.top + 'px';
-        this.elements.tooltip.style.left = position.left + 'px';
-    }
-
     calculateTooltipPosition(targetPos, placement, tooltipSize, offset) {
         const gap = 12;
         let top = 0;
@@ -312,16 +350,14 @@ class GuideMeFast {
         // Keep tooltip within viewport
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const scrollTop = window.pageYOffset;
-        const scrollLeft = window.pageXOffset;
 
-        if (left < scrollLeft) left = scrollLeft + 10;
-        if (left + tooltipSize.width > scrollLeft + viewportWidth) {
-            left = scrollLeft + viewportWidth - tooltipSize.width - 10;
+        if (left < 10) left = 10;
+        if (left + tooltipSize.width > viewportWidth - 10) {
+            left = viewportWidth - tooltipSize.width - 10;
         }
-        if (top < scrollTop) top = scrollTop + 10;
-        if (top + tooltipSize.height > scrollTop + viewportHeight) {
-            top = scrollTop + viewportHeight - tooltipSize.height - 10;
+        if (top < 10) top = 10;
+        if (top + tooltipSize.height > viewportHeight - 10) {
+            top = viewportHeight - tooltipSize.height - 10;
         }
 
         return { top, left };
@@ -417,11 +453,16 @@ class GuideMeFast {
         this.handleClose();
     }
 
+    // FIXED: Use requestAnimationFrame for smooth updates
     handleResize() {
         if (!this.isActive) return;
-        setTimeout(() => {
-            this.updateStep();
-        }, 100);
+        this.updatePositions();
+    }
+
+    // FIXED: Use requestAnimationFrame for smooth scroll updates
+    handleScroll() {
+        if (!this.isActive) return;
+        this.updatePositions();
     }
 
     setLoading(loading) {
@@ -431,8 +472,14 @@ class GuideMeFast {
         buttons.forEach(btn => {
             if (btn) {
                 btn.disabled = loading;
-                if (btn === this.elements.nextBtn && loading) {
-                    btn.textContent = 'Loading...';
+                if (btn === this.elements.nextBtn) {
+                    if (loading) {
+                        btn.dataset.originalText = btn.textContent;
+                        btn.textContent = 'Loading...';
+                    } else if (btn.dataset.originalText) {
+                        btn.textContent = btn.dataset.originalText;
+                        delete btn.dataset.originalText;
+                    }
                 }
             }
         });
@@ -442,12 +489,16 @@ class GuideMeFast {
         if (this.config.closeOnEscape) {
             document.addEventListener('keydown', this.handleKeyDown);
         }
-        window.addEventListener('resize', this.handleResize);
+
+        // Use passive listeners for better performance
+        window.addEventListener('resize', this.handleResize, { passive: true });
+        window.addEventListener('scroll', this.handleScroll, { passive: true });
     }
 
     removeEventListeners() {
         document.removeEventListener('keydown', this.handleKeyDown);
         window.removeEventListener('resize', this.handleResize);
+        window.removeEventListener('scroll', this.handleScroll);
     }
 
     removeElements() {
@@ -455,6 +506,45 @@ class GuideMeFast {
             this.elements.overlay.parentNode.removeChild(this.elements.overlay);
         }
         this.elements = {};
+    }
+
+    // Utility methods (useful to keep)
+    getCurrentStep() {
+        return this.config.steps[this.currentStep];
+    }
+
+    getProgress() {
+        return Math.round(((this.currentStep + 1) / this.config.steps.length) * 100);
+    }
+
+    addStep(step, index = null) {
+        if (index === null) {
+            this.config.steps.push(step);
+        } else {
+            this.config.steps.splice(index, 0, step);
+        }
+    }
+
+    removeStep(index) {
+        if (index >= 0 && index < this.config.steps.length) {
+            this.config.steps.splice(index, 1);
+
+            if (this.currentStep >= index && this.currentStep > 0) {
+                this.currentStep--;
+            }
+
+            if (this.isActive) {
+                this.updateStep();
+            }
+        }
+    }
+
+    updateConfig(newConfig) {
+        this.config = { ...this.config, ...newConfig };
+
+        if (this.isActive && this.elements.overlay) {
+            this.elements.overlay.className = `guidemefast-overlay guidemefast-theme-${this.config.theme}`;
+        }
     }
 }
 
@@ -466,4 +556,11 @@ if (typeof window !== 'undefined') {
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = GuideMeFast;
+}
+
+// AMD support
+if (typeof define === 'function' && define.amd) {
+    define([], function() {
+        return GuideMeFast;
+    });
 }
