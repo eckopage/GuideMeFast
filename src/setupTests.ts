@@ -40,3 +40,51 @@ jest.mock('react-dom', () => ({
     ...jest.requireActual('react-dom'),
     createPortal: (node: any) => node,
 }));
+
+// DODAJ TE MOCKI dla GuideMeFast:
+
+// Mock getBoundingClientRect
+Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
+    writable: true,
+    value: jest.fn(() => ({
+        top: 100,
+        left: 200,
+        width: 150,
+        height: 50,
+        right: 350,
+        bottom: 150,
+        x: 200,
+        y: 100,
+        toJSON: jest.fn()
+    })),
+});
+
+// Mock window dimensions
+Object.defineProperty(window, 'innerWidth', {
+    writable: true,
+    configurable: true,
+    value: 1024,
+});
+
+Object.defineProperty(window, 'innerHeight', {
+    writable: true,
+    configurable: true,
+    value: 768,
+});
+
+// Mock requestAnimationFrame
+global.requestAnimationFrame = jest.fn((callback) => {
+    return setTimeout(callback, 16);
+});
+
+global.cancelAnimationFrame = jest.fn((id) => {
+    clearTimeout(id);
+});
+
+// Cleanup after each test
+afterEach(() => {
+    // Clean up timers
+    jest.clearAllTimers();
+    // Clean up mocks
+    jest.clearAllMocks();
+});
