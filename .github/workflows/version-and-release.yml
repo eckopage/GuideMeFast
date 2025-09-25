@@ -97,20 +97,14 @@ jobs:
         run: |
           BUMP_TYPE="${{ steps.version.outputs.bump-type }}"
           FIRST_RELEASE="${{ steps.version.outputs.first-release }}"
-
-          if [ "$FIRST_RELEASE" = "true" ]; then
-            # For first release, start with version from package.json or 1.0.0
-            CURRENT_VERSION=$(node -p "require('./package.json').version")
-            echo "new-version=v$CURRENT_VERSION" >> $GITHUB_OUTPUT
-            echo "version-number=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          else
-            echo "Bumping $BUMP_TYPE version..."
-            NEW_VERSION=$(npm version $BUMP_TYPE --no-git-tag-version)
-            echo "Version bumped to $NEW_VERSION"
-
-            echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "version-number=$(echo $NEW_VERSION | sed 's/v//')" >> $GITHUB_OUTPUT
-          fi
+          
+          # Zawsze podbij wersję, nawet dla pierwszego release
+          echo "Bumping $BUMP_TYPE version..."
+          NEW_VERSION=$(npm version $BUMP_TYPE --no-git-tag-version)
+          echo "Version bumped to $NEW_VERSION"
+          
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version-number=$(echo $NEW_VERSION | sed 's/v//')" >> $GITHUB_OUTPUT
 
       - name: Rebuild with new version
         if: steps.version.outputs.should-release == 'true'
@@ -171,6 +165,20 @@ jobs:
           echo "Pushing tag ${{ steps.bump.outputs.new-version }}..."
           git push origin ${{ steps.bump.outputs.new-version }}
           echo "✅ Tag pushed successfully"
+
+      - name: Check if version exists
+        if: steps.version.outputs.should-release == 'true'
+        run: |
+          VERSION_NUMBER="${{ steps.bump.outputs.version-number }}"
+          
+          if npm view guidemefast@$VERSION_NUMBER version >/dev/null 2>&1; then
+            echo "❌ Version $VERSION_NUMBER already exists on NPM"
+            echo "Available versions:"
+            npm view guidemefast versions --json | tail -5
+            exit 1
+          else
+            echo "✅ Version $VERSION_NUMBER is available for publishing"
+          fi
 
       - name: Publish to NPM
         if: steps.version.outputs.should-release == 'true'
