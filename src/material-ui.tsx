@@ -12,14 +12,14 @@ import {
     Paper,
     Fade,
     useTheme,
-    alpha
+    alpha,
 } from '@mui/material';
 import {
     Close as CloseIcon,
     NavigateNext as NextIcon,
     NavigateBefore as PrevIcon,
     SkipNext as SkipIcon,
-    Check as CheckIcon
+    Check as CheckIcon,
 } from '@mui/icons-material';
 import { GuideMeFast, TourConfig, TourStep } from './index';
 
@@ -34,7 +34,7 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
       isOpen,
       config,
       onClose,
-      variant = 'overlay'
+      variant = 'overlay',
 }) => {
     const theme = useTheme();
     const [currentStep, setCurrentStep] = React.useState(0);
@@ -45,17 +45,38 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
     const isLastStep = currentStep === steps.length - 1;
     const isFirstStep = currentStep === 0;
 
+    // Reset step when dialog opens
+    React.useEffect(() => {
+        if (variant !== 'dialog' || !isOpen) {
+            return;
+        }
+        setCurrentStep(0);
+    }, [variant, isOpen]);
+
+    // Scroll to element when step changes
+    React.useEffect(() => {
+        if (variant !== 'dialog' || !isOpen || !currentStepData?.target) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            const element = document.querySelector(currentStepData.target);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                    inline: 'nearest',
+                });
+            }
+        }, 200);
+
+        return () => clearTimeout(timer);
+    }, [variant, currentStep, isOpen, currentStepData?.target]);
+
     // For overlay variant, use the fixed GuideMeFast component
     if (variant === 'overlay') {
         return <GuideMeFast isOpen={isOpen} config={config} onClose={onClose} />;
     }
-
-    // Reset step when dialog opens
-    React.useEffect(() => {
-        if (isOpen) {
-            setCurrentStep(0);
-        }
-    }, [isOpen]);
 
     const handleNext = async () => {
         setLoading(true);
@@ -76,7 +97,7 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
     };
 
     const handlePrev = async () => {
-        if (isFirstStep) return;
+        if (isFirstStep) {return;}
 
         setLoading(true);
         try {
@@ -103,24 +124,6 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
         }
     };
 
-    // Scroll to element when step changes
-    React.useEffect(() => {
-        if (isOpen && currentStepData?.target) {
-            const timer = setTimeout(() => {
-                const element = document.querySelector(currentStepData.target);
-                if (element) {
-                    element.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'nearest'
-                    });
-                }
-            }, 200);
-
-            return () => clearTimeout(timer);
-        }
-    }, [currentStep, isOpen, currentStepData?.target]);
-
     return (
         <Dialog
             open={isOpen}
@@ -134,7 +137,7 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
                         ? alpha(theme.palette.background.paper, 0.95)
                         : theme.palette.background.paper,
                     backdropFilter: 'blur(20px)',
-                }
+                },
             }}
             TransitionComponent={Fade}
             transitionDuration={300}
@@ -176,7 +179,7 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
                                 '& .MuiLinearProgress-bar': {
                                     borderRadius: 2,
                                     transition: 'transform 0.3s ease',
-                                }
+                                },
                             }}
                         />
                     </Box>
@@ -274,7 +277,7 @@ export const useMaterialUITour = (config: TourConfig, variant: 'dialog' | 'overl
         startTour,
         endTour,
         isOpen,
-        TourComponent
+        TourComponent,
     };
 };
 
@@ -296,7 +299,7 @@ export const MaterialUITourStep: React.FC<{
           isFirst,
           isLast,
           stepNumber,
-          totalSteps
+          totalSteps,
       }) => {
     const theme = useTheme();
 

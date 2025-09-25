@@ -16,7 +16,7 @@ class GuideMeFast {
             closeOnEscape: true,
             closeOnClickOutside: false,
             customStyles: {},
-            ...config
+            ...config,
         };
 
         this.currentStep = 0;
@@ -38,7 +38,7 @@ class GuideMeFast {
 
     // Public API
     start() {
-        if (this.isActive || !this.config.steps?.length) return;
+        if (this.isActive || !this.config.steps?.length) {return;}
 
         this.isActive = true;
         this.currentStep = 0;
@@ -48,7 +48,7 @@ class GuideMeFast {
     }
 
     stop() {
-        if (!this.isActive) return;
+        if (!this.isActive) {return;}
 
         this.isActive = false;
         this.removeEventListeners();
@@ -183,7 +183,7 @@ class GuideMeFast {
 
     updateStep() {
         const step = this.config.steps[this.currentStep];
-        if (!step) return;
+        if (!step) {return;}
 
         // Update tooltip content first
         this.updateTooltipContent(step);
@@ -203,7 +203,7 @@ class GuideMeFast {
 
         this.rafId = requestAnimationFrame(() => {
             const step = this.config.steps[this.currentStep];
-            if (!step) return;
+            if (!step) {return;}
 
             this.updateHighlight(step.target);
             this.updateTooltip(step);
@@ -227,7 +227,7 @@ class GuideMeFast {
             top: (rect.top - this.config.highlightPadding) + 'px',
             left: (rect.left - this.config.highlightPadding) + 'px',
             width: (rect.width + this.config.highlightPadding * 2) + 'px',
-            height: (rect.height + this.config.highlightPadding * 2) + 'px'
+            height: (rect.height + this.config.highlightPadding * 2) + 'px',
         };
 
         Object.assign(this.elements.highlight.style, highlightStyle);
@@ -236,7 +236,7 @@ class GuideMeFast {
     // FIXED: Simplified tooltip positioning
     updateTooltip(step) {
         const target = document.querySelector(step.target);
-        if (!target) return;
+        if (!target) {return;}
 
         const targetRect = target.getBoundingClientRect();
         const tooltipRect = this.elements.tooltip.getBoundingClientRect();
@@ -245,19 +245,19 @@ class GuideMeFast {
             top: targetRect.top,
             left: targetRect.left,
             width: targetRect.width,
-            height: targetRect.height
+            height: targetRect.height,
         };
 
         const tooltipSize = {
             width: tooltipRect.width || 320,
-            height: tooltipRect.height || 200
+            height: tooltipRect.height || 200,
         };
 
         const position = this.calculateTooltipPosition(
             targetPos,
             step.placement || 'top',
             tooltipSize,
-            step.offset || { x: 0, y: 0 }
+            step.offset || { x: 0, y: 0 },
         );
 
         // Use fixed positioning
@@ -351,11 +351,11 @@ class GuideMeFast {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        if (left < 10) left = 10;
+        if (left < 10) {left = 10;}
         if (left + tooltipSize.width > viewportWidth - 10) {
             left = viewportWidth - tooltipSize.width - 10;
         }
-        if (top < 10) top = 10;
+        if (top < 10) {top = 10;}
         if (top + tooltipSize.height > viewportHeight - 10) {
             top = viewportHeight - tooltipSize.height - 10;
         }
@@ -369,14 +369,14 @@ class GuideMeFast {
             element.scrollIntoView({
                 behavior: this.config.scrollBehavior,
                 block: 'center',
-                inline: 'nearest'
+                inline: 'nearest',
             });
         }
     }
 
     // Event handlers
     async handleNext() {
-        if (this.loading) return;
+        if (this.loading) {return;}
 
         const step = this.config.steps[this.currentStep];
         const isLastStep = this.currentStep === this.config.steps.length - 1;
@@ -403,7 +403,7 @@ class GuideMeFast {
     }
 
     async handlePrev() {
-        if (this.loading || this.currentStep === 0) return;
+        if (this.loading || this.currentStep === 0) {return;}
 
         const step = this.config.steps[this.currentStep];
 
@@ -424,7 +424,7 @@ class GuideMeFast {
     }
 
     async handleSkip() {
-        if (this.loading) return;
+        if (this.loading) {return;}
 
         const step = this.config.steps[this.currentStep];
 
@@ -449,19 +449,19 @@ class GuideMeFast {
     }
 
     handleKeyDown(e) {
-        if (!this.config.closeOnEscape || e.key !== 'Escape') return;
+        if (!this.config.closeOnEscape || e.key !== 'Escape') {return;}
         this.handleClose();
     }
 
     // FIXED: Use requestAnimationFrame for smooth updates
     handleResize() {
-        if (!this.isActive) return;
+        if (!this.isActive) {return;}
         this.updatePositions();
     }
 
     // FIXED: Use requestAnimationFrame for smooth scroll updates
     handleScroll() {
-        if (!this.isActive) return;
+        if (!this.isActive) {return;}
         this.updatePositions();
     }
 
@@ -560,7 +560,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // AMD support
 if (typeof define === 'function' && define.amd) {
-    define([], function() {
+    define([], () => {
         return GuideMeFast;
     });
 }
