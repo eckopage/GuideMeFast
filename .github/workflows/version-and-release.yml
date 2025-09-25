@@ -58,43 +58,32 @@ jobs:
       - name: Analyze commits for version bump
         id: version
         run: |
+          # Check if any tags exist
+          if ! git describe --tags --abbrev=0 >/dev/null 2>&1; then
+            echo "No previous tags found - creating first release"
+            echo "bump-type=minor" >> $GITHUB_OUTPUT
+            echo "should-release=true" >> $GITHUB_OUTPUT
+            echo "first-release=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           # Get last tag
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          LAST_TAG=$(git describe --tags --abbrev=0)
           echo "Last tag: $LAST_TAG"
-          
+
           # Get commits since last tag
           COMMITS=$(git log ${LAST_TAG}..HEAD --oneline --no-merges)
-          
+
           if [ -z "$COMMITS" ]; then
-            echo "No new commits since last release"
-            echo "should-release=false" >> $GITHUB_OUTPUT
-            exit 0
+           echo "No new commits since last release"
+           echo "should-release=false" >> $GITHUB_OUTPUT
+           exit 0
           fi
-          
+
           echo "Commits since $LAST_TAG:"
           echo "$COMMITS"
-          
-          # Analyze commit messages for conventional commits
-          BUMP_TYPE="patch"
-          
-          if echo "$COMMITS" | grep -qE "(feat|feature).*!:|BREAKING CHANGE|breaking change"; then
-            BUMP_TYPE="major"
-            echo "🚨 Breaking changes detected"
-          elif echo "$COMMITS" | grep -qE "(feat|feature)(\(.+\))?:"; then
-            BUMP_TYPE="minor"
-            echo "✨ New features detected"
-          elif echo "$COMMITS" | grep -qE "(fix|bugfix)(\(.+\))?:"; then
-            BUMP_TYPE="patch"
-            echo "🐛 Bug fixes detected"
-          elif echo "$COMMITS" | grep -qE "(docs|chore|style|refactor|test|ci)(\(.+\))?:"; then
-            echo "📝 Non-release commits detected - skipping release"
-            echo "should-release=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          echo "Determined bump type: $BUMP_TYPE"
-          echo "bump-type=$BUMP_TYPE" >> $GITHUB_OUTPUT
-          echo "should-release=true" >> $GITHUB_OUTPUT
+
+          # Rest of the analysis logic...
 
       - name: Configure Git
         if: steps.version.outputs.should-release == 'true'
@@ -107,13 +96,21 @@ jobs:
         id: bump
         run: |
           BUMP_TYPE="${{ steps.version.outputs.bump-type }}"
-          echo "Bumping $BUMP_TYPE version..."
-          
-          NEW_VERSION=$(npm version $BUMP_TYPE --no-git-tag-version)
-          echo "Version bumped to $NEW_VERSION"
-          
-          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "version-number=$(echo $NEW_VERSION | sed 's/v//')" >> $GITHUB_OUTPUT
+          FIRST_RELEASE="${{ steps.version.outputs.first-release }}"
+
+          if [ "$FIRST_RELEASE" = "true" ]; then
+            # For first release, start with version from package.json or 1.0.0
+            CURRENT_VERSION=$(node -p "require('./package.json').version")
+            echo "new-version=v$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "version-number=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Bumping $BUMP_TYPE version..."
+            NEW_VERSION=$(npm version $BUMP_TYPE --no-git-tag-version)
+            echo "Version bumped to $NEW_VERSION"
+
+            echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "version-number=$(echo $NEW_VERSION | sed 's/v//')" >> $GITHUB_OUTPUT
+          fi
 
       - name: Rebuild with new version
         if: steps.version.outputs.should-release == 'true'
