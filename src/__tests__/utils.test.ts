@@ -16,39 +16,39 @@ describe('Utility Functions', () => {
             bottom: 150,
             x: 200,
             y: 100,
-            toJSON: jest.fn()
+            toJSON: jest.fn(),
         }));
 
         // Mock scroll properties
         Object.defineProperty(window, 'pageYOffset', {
             value: 0,
-            writable: true
+            writable: true,
         });
 
         Object.defineProperty(window, 'pageXOffset', {
             value: 0,
-            writable: true
+            writable: true,
         });
 
         Object.defineProperty(document.documentElement, 'scrollTop', {
             value: 0,
-            writable: true
+            writable: true,
         });
 
         Object.defineProperty(document.documentElement, 'scrollLeft', {
             value: 0,
-            writable: true
+            writable: true,
         });
 
         // Mock window dimensions
         Object.defineProperty(window, 'innerWidth', {
             value: 1024,
-            writable: true
+            writable: true,
         });
 
         Object.defineProperty(window, 'innerHeight', {
             value: 768,
-            writable: true
+            writable: true,
         });
     });
 
@@ -95,16 +95,10 @@ describe('Utility Functions', () => {
     describe('Viewport Calculations', () => {
         test('should respect viewport boundaries', () => {
             // Test data for tooltip positioning
-            const targetPos = {
-                top: 50,
-                left: 50,
-                width: 100,
-                height: 50
-            };
 
             const tooltipSize = {
                 width: 300,
-                height: 200
+                height: 200,
             };
 
             // When tooltip would go outside viewport, it should be adjusted
@@ -202,13 +196,13 @@ describe('Utility Functions', () => {
             testElement.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center',
-                inline: 'nearest'
+                inline: 'nearest',
             });
 
             expect(scrollIntoViewSpy).toHaveBeenCalledWith({
                 behavior: 'smooth',
                 block: 'center',
-                inline: 'nearest'
+                inline: 'nearest',
             });
 
             document.body.removeChild(testElement);
@@ -239,7 +233,7 @@ describe('Utility Functions', () => {
 
             const adjustedPosition = {
                 top: basePosition.top + offset.y,
-                left: basePosition.left + offset.x
+                left: basePosition.left + offset.x,
             };
 
             expect(adjustedPosition.top).toBe(80); // 100 + (-20)
@@ -252,7 +246,7 @@ describe('Utility Functions', () => {
 
             const adjustedPosition = {
                 top: basePosition.top + offset.y,
-                left: basePosition.left + offset.x
+                left: basePosition.left + offset.x,
             };
 
             expect(adjustedPosition.top).toBe(100);
@@ -265,7 +259,7 @@ describe('Utility Functions', () => {
 
             const adjustedPosition = {
                 top: basePosition.top + offset.y,
-                left: basePosition.left + offset.x
+                left: basePosition.left + offset.x,
             };
 
             expect(adjustedPosition.top).toBe(70); // 100 - 30
@@ -314,7 +308,7 @@ describe('Mathematical Calculations', () => {
             const point2 = { x: 3, y: 4 };
 
             const distance = Math.sqrt(
-                Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
+                Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2),
             );
 
             expect(distance).toBe(5); // 3-4-5 triangle
@@ -338,7 +332,7 @@ describe('Array and Object Utilities', () => {
             const steps = [
                 { target: '#1', title: 'Step 1', content: 'Content 1' },
                 { target: '#2', title: 'Step 2', content: 'Content 2' },
-                { target: '#3', title: 'Step 3', content: 'Content 3' }
+                { target: '#3', title: 'Step 3', content: 'Content 3' },
             ];
 
             const isValidIndex = (index: number) =>
@@ -357,13 +351,13 @@ describe('Array and Object Utilities', () => {
             const validStep = {
                 target: '#valid',
                 title: 'Valid Step',
-                content: 'Valid content'
+                content: 'Valid content',
             };
 
             const invalidStep = {
                 // missing target
                 title: 'Invalid Step',
-                content: 'Invalid content'
+                content: 'Invalid content',
             };
 
             expect(validStep.target).toBeDefined();
@@ -381,7 +375,7 @@ describe('Array and Object Utilities', () => {
                 content: 'Test content',
                 placement: 'top' as const,
                 showSkip: false,
-                offset: { x: 10, y: 20 }
+                offset: { x: 10, y: 20 },
             };
 
             expect(stepWithOptionals.placement).toBe('top');

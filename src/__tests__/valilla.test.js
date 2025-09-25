@@ -19,9 +19,9 @@ describe('GuideMeFast Vanilla', () => {
                 {
                     target: '#test-target',
                     title: 'Test',
-                    content: 'Test content'
-                }
-            ]
+                    content: 'Test content',
+                },
+            ],
         };
 
         const tour = new GuideMeFast(config);
@@ -30,7 +30,7 @@ describe('GuideMeFast Vanilla', () => {
 
     test('starts and stops tour', () => {
         const tour = new GuideMeFast({
-            steps: [{ target: '#test-target', title: 'Test', content: 'Test' }]
+            steps: [{ target: '#test-target', title: 'Test', content: 'Test' }],
         });
 
         tour.start();

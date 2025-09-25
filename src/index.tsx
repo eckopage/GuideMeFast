@@ -48,7 +48,7 @@ interface Position {
 // Utility functions
 const getElementPosition = (selector: string): Position | null => {
     const element = document.querySelector(selector);
-    if (!element) return null;
+    if (!element) {return null;}
 
     const rect = element.getBoundingClientRect();
 
@@ -56,7 +56,7 @@ const getElementPosition = (selector: string): Position | null => {
         top: rect.top,
         left: rect.left,
         width: rect.width,
-        height: rect.height
+        height: rect.height,
     };
 };
 
@@ -66,7 +66,7 @@ const scrollToElement = (selector: string, behavior: 'smooth' | 'auto' = 'smooth
         element.scrollIntoView({
             behavior,
             block: 'center',
-            inline: 'nearest'
+            inline: 'nearest',
         });
     }
 };
@@ -75,7 +75,7 @@ const calculateTooltipPosition = (
     targetPos: Position,
     placement: string,
     tooltipSize: { width: number; height: number },
-    offset: { x: number; y: number } = { x: 0, y: 0 }
+    offset: { x: number; y: number } = { x: 0, y: 0 },
 ) => {
     const gap = 12;
     let top = 0;
@@ -107,11 +107,11 @@ const calculateTooltipPosition = (
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    if (left < 10) left = 10;
+    if (left < 10) {left = 10;}
     if (left + tooltipSize.width > viewportWidth - 10) {
         left = viewportWidth - tooltipSize.width - 10;
     }
-    if (top < 10) top = 10;
+    if (top < 10) {top = 10;}
     if (top + tooltipSize.height > viewportHeight - 10) {
         top = viewportHeight - tooltipSize.height - 10;
     }
@@ -145,7 +145,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
         zIndex = 9999,
         closeOnEscape = true,
         closeOnClickOutside = false,
-        customStyles = {}
+        customStyles = {},
     } = config;
 
     const currentStepData = steps[currentStep];
@@ -154,15 +154,15 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
 
     // FIXED: Update position function with requestAnimationFrame
     const updatePosition = useCallback(() => {
-        if (!isOpen || !currentStepData) return;
+        if (!isOpen || !currentStepData) {return;}
 
         const pos = getElementPosition(currentStepData.target);
         setTargetPosition(pos);
-    }, [isOpen, currentStepData?.target]);
+    }, [isOpen, currentStepData]);
 
     // Handle keyboard events
     useEffect(() => {
-        if (!isOpen || !closeOnEscape) return;
+        if (!isOpen || !closeOnEscape) {return;}
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -176,7 +176,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
 
     // Update position when step changes
     useEffect(() => {
-        if (!isOpen || !currentStepData) return;
+        if (!isOpen || !currentStepData) {return;}
 
         const timer = setTimeout(() => {
             updatePosition();
@@ -184,11 +184,11 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
         }, 100);
 
         return () => clearTimeout(timer);
-    }, [currentStep, isOpen, currentStepData?.target, scrollBehavior, updatePosition]);
+    }, [currentStep, isOpen, currentStepData, scrollBehavior, updatePosition]);
 
     // CRITICAL FIX: Handle scroll and resize events with requestAnimationFrame
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {return;}
 
         let rafId: number;
 
@@ -239,7 +239,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
     }, [currentStepData, isLastStep, onComplete, onClose]);
 
     const handlePrev = useCallback(async () => {
-        if (isFirstStep) return;
+        if (isFirstStep) {return;}
 
         setLoading(true);
         try {
@@ -268,19 +268,19 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
 
     // Calculate tooltip position using fixed positioning
     const tooltipPosition = useMemo(() => {
-        if (!targetPosition || !currentStepData) return { top: 0, left: 0 };
+        if (!targetPosition || !currentStepData) {return { top: 0, left: 0 };}
 
         return calculateTooltipPosition(
             targetPosition,
             currentStepData.placement || 'top',
             tooltipSize,
-            currentStepData.offset
+            currentStepData.offset,
         );
-    }, [targetPosition, currentStepData?.placement, currentStepData?.offset, tooltipSize]);
+    }, [targetPosition, currentStepData, tooltipSize]);
 
     // FIXED: Calculate highlight style using fixed positioning
     const highlightStyle = useMemo(() => {
-        if (!targetPosition) return { display: 'none' };
+        if (!targetPosition) {return { display: 'none' };}
 
         return {
             position: 'fixed' as const,
@@ -290,11 +290,11 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
             height: targetPosition.height + (highlightPadding * 2),
             zIndex: zIndex + 1,
             pointerEvents: 'none' as const,
-            ...customStyles.highlight
+            ...customStyles.highlight,
         };
     }, [targetPosition, highlightPadding, zIndex, customStyles.highlight]);
 
-    if (!isOpen || !currentStepData) return null;
+    if (!isOpen || !currentStepData) {return null;}
 
     return createPortal(
         <div className={`guidemefast-overlay guidemefast-theme-${theme}`}>
@@ -309,7 +309,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
                     height: '100%',
                     opacity: backdropOpacity,
                     zIndex,
-                    ...customStyles.backdrop
+                    ...customStyles.backdrop,
                 }}
                 onClick={closeOnClickOutside ? onClose : undefined}
             />
@@ -330,7 +330,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
                     top: tooltipPosition.top,
                     left: tooltipPosition.left,
                     zIndex: zIndex + 2,
-                    ...customStyles.tooltip
+                    ...customStyles.tooltip,
                 }}
                 ref={(ref) => {
                     if (ref) {
@@ -356,7 +356,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
                         <div
                             className="guidemefast-progress-bar"
                             style={{
-                                width: `${((currentStep + 1) / steps.length) * 100}%`
+                                width: `${((currentStep + 1) / steps.length) * 100}%`,
                             }}
                         />
                     </div>
@@ -418,7 +418,7 @@ export const GuideMeFast: React.FC<GuideMeFastProps> = ({ isOpen, config, onClos
                 />
             </div>
         </div>,
-        document.body
+        document.body,
     );
 };
 
@@ -446,7 +446,7 @@ export const useGuideMeFast = (config: TourConfig) => {
         startTour,
         endTour,
         isOpen,
-        TourComponent
+        TourComponent,
     };
 };
 

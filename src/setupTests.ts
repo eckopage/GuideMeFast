@@ -1,5 +1,6 @@
 // src/setupTests.ts
 import '@testing-library/jest-dom';
+import React from 'react';
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -9,7 +10,7 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 // Mock IntersectionObserver
-//@ts-ignore
+//@ts-expect-error weird
 global.IntersectionObserver = class IntersectionObserver {
     constructor() {}
     observe() {}
@@ -38,7 +39,7 @@ Element.prototype.scrollIntoView = jest.fn();
 // Mock createPortal for React portals
 jest.mock('react-dom', () => ({
     ...jest.requireActual('react-dom'),
-    createPortal: (node: any) => node,
+    createPortal: (node: React.ReactNode) => node,
 }));
 
 // DODAJ TE MOCKI dla GuideMeFast:
@@ -55,7 +56,7 @@ Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
         bottom: 150,
         x: 200,
         y: 100,
-        toJSON: jest.fn()
+        toJSON: jest.fn(),
     })),
 });
 
