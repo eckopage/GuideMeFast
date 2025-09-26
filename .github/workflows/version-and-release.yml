@@ -174,18 +174,51 @@ jobs:
       - name: Push changes and tags
         if: steps.version.outputs.should-release == 'true'
         run: |
-          # Check if there are local commits to push
-          if [ "$(git rev-list HEAD...origin/${{ github.ref_name }} --count)" != "0" ] 2>/dev/null; then
-            echo "Pushing commits to ${{ github.ref_name }}..."
-            git push origin ${{ github.ref_name }}
-          else
-            echo "No commits to push to branch"
+          NEW_VERSION="${{ steps.bump.outputs.new-version }}"
+
+          # Fetch latest changes to avoid conflicts
+          echo "Fetching latest changes..."
+          git fetch origin ${{ github.ref_name }}
+
+          # Check if we need to rebase/merge
+          BEHIND_COUNT=$(git rev-list --count HEAD..origin/${{ github.ref_name }})
+          if [ "$BEHIND_COUNT" -gt 0 ]; then
+            echo "Local branch is $BEHIND_COUNT commits behind remote"
+            echo "Attempting to rebase..."
+
+            # Try to rebase our commit on top of latest changes
+            if git rebase origin/${{ github.ref_name }}; then
+              echo "✅ Rebase successful"
+            else
+              echo "❌ Rebase failed, trying reset and re-apply"
+
+              # Reset to remote state
+              git reset --hard origin/${{ github.ref_name }}
+
+              # Re-apply version bump
+              BUMP_TYPE="${{ steps.version.outputs.bump-type }}"
+              npm version $BUMP_TYPE --no-git-tag-version
+              npm run build
+
+              # Re-commit
+              git add -A
+              if [ -n "$(git status --porcelain)" ]; then
+                git commit -m "chore: release $NEW_VERSION"
+              fi
+
+              # Re-create tag
+              git tag -d "$NEW_VERSION" 2>/dev/null || true
+              git tag "$NEW_VERSION"
+            fi
           fi
-          
-          # Always push the tag
-          echo "Pushing tag ${{ steps.bump.outputs.new-version }}..."
-          git push origin ${{ steps.bump.outputs.new-version }}
-          echo "✅ Tag pushed successfully"
+
+          # Now push
+          echo "Pushing commits to ${{ github.ref_name }}..."
+          git push origin ${{ github.ref_name }}
+
+          echo "Pushing tag $NEW_VERSION..."
+          git push origin "$NEW_VERSION"
+          echo "✅ Push completed successfully"
 
       - name: Check if version exists
         if: steps.version.outputs.should-release == 'true'
