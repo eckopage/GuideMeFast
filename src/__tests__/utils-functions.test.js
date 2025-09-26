@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * @jest-environment jsdom
  */
@@ -35,11 +36,11 @@ describe('GuideMeFast Utility Functions', () => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        if (left < 10) left = 10;
+        if (left < 10) {left = 10;}
         if (left + tooltipSize.width > viewportWidth - 10) {
             left = viewportWidth - tooltipSize.width - 10;
         }
-        if (top < 10) top = 10;
+        if (top < 10) {top = 10;}
         if (top + tooltipSize.height > viewportHeight - 10) {
             top = viewportHeight - tooltipSize.height - 10;
         }
@@ -49,14 +50,14 @@ describe('GuideMeFast Utility Functions', () => {
 
     const getElementPosition = (selector) => {
         const element = document.querySelector(selector);
-        if (!element) return null;
+        if (!element) {return null;}
 
         const rect = element.getBoundingClientRect();
         return {
             top: rect.top,
             left: rect.left,
             width: rect.width,
-            height: rect.height
+            height: rect.height,
         };
     };
 
@@ -83,12 +84,12 @@ describe('GuideMeFast Utility Functions', () => {
         Object.defineProperty(window, 'innerWidth', {
             writable: true,
             configurable: true,
-            value: 1024
+            value: 1024,
         });
         Object.defineProperty(window, 'innerHeight', {
             writable: true,
             configurable: true,
-            value: 768
+            value: 768,
         });
 
         // Wyczyść DOM
@@ -189,7 +190,7 @@ describe('GuideMeFast Utility Functions', () => {
                 bottom: 150,
                 right: 350,
                 x: 200,
-                y: 100
+                y: 100,
             }));
 
             const position = getElementPosition('#test-element');
@@ -198,7 +199,7 @@ describe('GuideMeFast Utility Functions', () => {
                 top: 100,
                 left: 200,
                 width: 150,
-                height: 50
+                height: 50,
             });
         });
 
@@ -219,7 +220,7 @@ describe('GuideMeFast Utility Functions', () => {
             elements.forEach(element => {
                 element.getBoundingClientRect = jest.fn(() => ({
                     top: 50, left: 100, width: 100, height: 30,
-                    bottom: 80, right: 200, x: 100, y: 50
+                    bottom: 80, right: 200, x: 100, y: 50,
                 }));
             });
 
@@ -235,7 +236,7 @@ describe('GuideMeFast Utility Functions', () => {
                 target: '#test-element',
                 title: 'Test Title',
                 content: 'Test content',
-                placement: 'top'
+                placement: 'top',
             };
 
             const errors = validateStep(step);
@@ -245,7 +246,7 @@ describe('GuideMeFast Utility Functions', () => {
         test('wykrywa brak target', () => {
             const step = {
                 title: 'Test Title',
-                content: 'Test content'
+                content: 'Test content',
             };
 
             const errors = validateStep(step);
@@ -254,7 +255,7 @@ describe('GuideMeFast Utility Functions', () => {
 
         test('wykrywa brak title i content', () => {
             const step = {
-                target: '#test-element'
+                target: '#test-element',
             };
 
             const errors = validateStep(step);
@@ -264,7 +265,7 @@ describe('GuideMeFast Utility Functions', () => {
         test('akceptuje krok tylko z title', () => {
             const step = {
                 target: '#test-element',
-                title: 'Test Title'
+                title: 'Test Title',
             };
 
             const errors = validateStep(step);
@@ -274,7 +275,7 @@ describe('GuideMeFast Utility Functions', () => {
         test('akceptuje krok tylko z content', () => {
             const step = {
                 target: '#test-element',
-                content: 'Test content'
+                content: 'Test content',
             };
 
             const errors = validateStep(step);
@@ -285,7 +286,7 @@ describe('GuideMeFast Utility Functions', () => {
             const step = {
                 target: '#test-element',
                 title: 'Test Title',
-                placement: 'invalid-placement'
+                placement: 'invalid-placement',
             };
 
             const errors = validateStep(step);
@@ -299,7 +300,7 @@ describe('GuideMeFast Utility Functions', () => {
                 const step = {
                     target: '#test-element',
                     title: 'Test Title',
-                    placement
+                    placement,
                 };
 
                 const errors = validateStep(step);
@@ -309,7 +310,7 @@ describe('GuideMeFast Utility Functions', () => {
 
         test('zbiera wiele błędów', () => {
             const step = {
-                placement: 'invalid'
+                placement: 'invalid',
                 // brak target, title, content
             };
 
@@ -369,7 +370,7 @@ describe('GuideMeFast Utility Functions', () => {
             return new MouseEvent(type, {
                 clientX: coordinates.x || 0,
                 clientY: coordinates.y || 0,
-                bubbles: true
+                bubbles: true,
             });
         };
 
@@ -421,7 +422,7 @@ describe('GuideMeFast Utility Functions', () => {
         const getScrollPosition = () => {
             return {
                 x: window.pageXOffset || document.documentElement.scrollLeft,
-                y: window.pageYOffset || document.documentElement.scrollTop
+                y: window.pageYOffset || document.documentElement.scrollTop,
             };
         };
 

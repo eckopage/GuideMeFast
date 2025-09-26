@@ -19,7 +19,7 @@ describe('GuideMeFast Configuration Tests', () => {
                 closeOnClickOutside: false,
                 customStyles: {},
                 steps: [],
-                ...config
+                ...config,
             };
             this.currentStep = 0;
             this.isActive = false;
@@ -79,7 +79,7 @@ describe('GuideMeFast Configuration Tests', () => {
             theme: 'dark',
             backdropOpacity: 0.9,
             closeOnClickOutside: true,
-            highlightPadding: 12
+            highlightPadding: 12,
         };
 
         const tour = new MockGuideMeFast(customConfig);
@@ -100,8 +100,8 @@ describe('GuideMeFast Configuration Tests', () => {
             theme: 'light',
             backdropOpacity: 0.5,
             steps: [
-                { target: '#test', title: 'Test', content: 'Content' }
-            ]
+                { target: '#test', title: 'Test', content: 'Content' },
+            ],
         };
 
         const tour = new MockGuideMeFast(config);
@@ -113,7 +113,7 @@ describe('GuideMeFast Configuration Tests', () => {
     test('validacja konfiguracji - niepoprawny theme', () => {
         const config = {
             theme: 'invalid-theme',
-            steps: []
+            steps: [],
         };
 
         const tour = new MockGuideMeFast(config);
@@ -125,7 +125,7 @@ describe('GuideMeFast Configuration Tests', () => {
     test('validacja konfiguracji - niepoprawny backdropOpacity', () => {
         const config = {
             backdropOpacity: 1.5, // Powyżej 1
-            steps: []
+            steps: [],
         };
 
         const tour = new MockGuideMeFast(config);
@@ -136,7 +136,7 @@ describe('GuideMeFast Configuration Tests', () => {
 
     test('validacja konfiguracji - brak steps', () => {
         const config = {
-            theme: 'light'
+            theme: 'light',
             // celowo pomijamy steps, żeby były undefined
         };
 
@@ -167,7 +167,7 @@ describe('GuideMeFast Configuration Tests', () => {
         const customStyles = {
             tooltip: { borderRadius: '10px' },
             backdrop: { backgroundColor: 'rgba(0,0,0,0.8)' },
-            highlight: { boxShadow: '0 0 20px blue' }
+            highlight: { boxShadow: '0 0 20px blue' },
         };
 
         const tour = new MockGuideMeFast({ customStyles });
@@ -182,15 +182,15 @@ describe('GuideMeFast Configuration Tests', () => {
                 target: '#step1',
                 title: 'First Step',
                 content: 'This is the first step',
-                placement: 'bottom'
+                placement: 'bottom',
             },
             {
                 target: '#step2',
                 title: 'Second Step',
                 content: 'This is the second step',
                 placement: 'top',
-                showSkip: false
-            }
+                showSkip: false,
+            },
         ];
 
         const tour = new MockGuideMeFast({ steps });
@@ -208,7 +208,7 @@ describe('GuideMeFast Configuration Tests', () => {
         const tour = new MockGuideMeFast({
             onComplete,
             onSkip,
-            steps: []
+            steps: [],
         });
 
         const config = tour.getConfig();
@@ -220,7 +220,7 @@ describe('GuideMeFast Configuration Tests', () => {
     test('konfiguracja z wszystkimi opcjami', () => {
         const fullConfig = {
             steps: [
-                { target: '#test', title: 'Test', content: 'Content' }
+                { target: '#test', title: 'Test', content: 'Content' },
             ],
             theme: 'material',
             showProgress: false,
@@ -232,10 +232,10 @@ describe('GuideMeFast Configuration Tests', () => {
             closeOnEscape: false,
             closeOnClickOutside: true,
             customStyles: {
-                tooltip: { background: 'linear-gradient(45deg, red, blue)' }
+                tooltip: { background: 'linear-gradient(45deg, red, blue)' },
             },
             onComplete: jest.fn(),
-            onSkip: jest.fn()
+            onSkip: jest.fn(),
         };
 
         const tour = new MockGuideMeFast(fullConfig);
@@ -257,8 +257,8 @@ describe('GuideMeFast Configuration Tests', () => {
                 showNext: true,
                 showSkip: true,
                 customClass: 'custom-step-1',
-                offset: { x: 10, y: 20 }
-            }
+                offset: { x: 10, y: 20 },
+            },
         ];
 
         const tour = new MockGuideMeFast({ steps });

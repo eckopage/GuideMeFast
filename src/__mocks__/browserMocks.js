@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-console */
 // Browser API mocks for Jest testing environment
 
 // Mock requestAnimationFrame
@@ -22,21 +23,21 @@ HTMLElement.prototype.getBoundingClientRect = HTMLElement.prototype.getBoundingC
         width: 0,
         height: 0,
         x: 0,
-        y: 0
+        y: 0,
     };
 };
 
 // Mock for window.getComputedStyle
 window.getComputedStyle = window.getComputedStyle || function() {
     return {
-        getPropertyValue: function() { return ''; }
+        getPropertyValue() { return ''; },
     };
 };
 
 // Mock for CSS.supports (may be used by Material-UI)
 if (typeof CSS === 'undefined') {
     global.CSS = {
-        supports: function() { return false; }
+        supports() { return false; },
     };
 }
 
@@ -44,11 +45,11 @@ if (typeof CSS === 'undefined') {
 window.matchMedia = window.matchMedia || function() {
     return {
         matches: false,
-        addListener: function() {},
-        removeListener: function() {},
-        addEventListener: function() {},
-        removeEventListener: function() {},
-        dispatchEvent: function() { return true; }
+        addListener() {},
+        removeListener() {},
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent() { return true; },
     };
 };
 

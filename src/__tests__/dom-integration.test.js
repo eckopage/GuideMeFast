@@ -1,4 +1,4 @@
-// Test integracji z DOM - bez React, tylko vanilla JS
+/* eslint-disable no-undef */
 /**
  * @jest-environment jsdom
  */
@@ -146,13 +146,13 @@ describe('GuideMeFast DOM Integration', () => {
 
         step1.scrollIntoView({
             behavior: 'smooth',
-            block: 'center'
+            block: 'center',
         });
 
         // Sprawdź, że metoda została wywołana
         expect(step1.scrollIntoView).toHaveBeenCalledWith({
             behavior: 'smooth',
-            block: 'center'
+            block: 'center',
         });
     });
 

@@ -1,4 +1,4 @@
-// Prosty test dla vanilla JavaScript - bez transpilacji
+/* eslint-disable no-undef, @typescript-eslint/no-unused-vars */
 /**
  * @jest-environment jsdom
  */
@@ -57,8 +57,8 @@ describe('GuideMeFast Vanilla JS - Simple Tests', () => {
     test('tworzy instancję z podstawową konfiguracją', () => {
         const config = {
             steps: [
-                { target: '#test', title: 'Test', content: 'Test content' }
-            ]
+                { target: '#test', title: 'Test', content: 'Test content' },
+            ],
         };
 
         const tour = new GuideMeFast(config);
@@ -81,8 +81,8 @@ describe('GuideMeFast Vanilla JS - Simple Tests', () => {
 
         const config = {
             steps: [
-                { target: '#test-element', title: 'Test', content: 'Test content' }
-            ]
+                { target: '#test-element', title: 'Test', content: 'Test content' },
+            ],
         };
 
         const tour = new GuideMeFast(config);
@@ -95,8 +95,8 @@ describe('GuideMeFast Vanilla JS - Simple Tests', () => {
     test('zatrzymuje tour', () => {
         const config = {
             steps: [
-                { target: '#test', title: 'Test', content: 'Test content' }
-            ]
+                { target: '#test', title: 'Test', content: 'Test content' },
+            ],
         };
 
         const tour = new GuideMeFast(config);
@@ -121,7 +121,7 @@ describe('GuideMeFast Vanilla JS - Simple Tests', () => {
         const configs = [
             { theme: 'light', steps: [] },
             { theme: 'dark', steps: [] },
-            { theme: 'material', steps: [] }
+            { theme: 'material', steps: [] },
         ];
 
         configs.forEach(config => {
@@ -134,7 +134,7 @@ describe('GuideMeFast Vanilla JS - Simple Tests', () => {
         const config = {
             steps: [],
             backdropOpacity: 0.8,
-            closeOnClickOutside: true
+            closeOnClickOutside: true,
         };
 
         const tour = new GuideMeFast(config);
@@ -146,7 +146,7 @@ describe('GuideMeFast Vanilla JS - Simple Tests', () => {
         const config = {
             steps: [],
             highlightPadding: 12,
-            scrollBehavior: 'auto'
+            scrollBehavior: 'auto',
         };
 
         const tour = new GuideMeFast(config);

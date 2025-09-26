@@ -1,4 +1,4 @@
-// Jest setup file
+/* eslint-disable no-console, @typescript-eslint/no-explicit-any */
 import '@testing-library/jest-dom';
 
 // Mock dla requestAnimationFrame i cancelAnimationFrame
@@ -39,7 +39,7 @@ Element.prototype.getBoundingClientRect = jest.fn(() => ({
     right: 100,
     x: 0,
     y: 0,
-    toJSON: jest.fn()
+    toJSON: jest.fn(),
 }));
 
 // Mock dla getComputedStyle
@@ -53,7 +53,7 @@ global.getComputedStyle = jest.fn(() => ({
     cssFloat: '',
     cssText: '',
     item: jest.fn(() => ''),
-    [Symbol.iterator]: jest.fn()
+    [Symbol.iterator]: jest.fn(),
 })) as any;
 
 // Mock dla window.matchMedia
