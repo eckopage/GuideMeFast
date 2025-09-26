@@ -34,6 +34,7 @@
   },
   "scripts": {
     "build": "rollup -c",
+    "build:debug": "DEBUG=rollup* rollup -c",
     "build:watch": "rollup -c -w",
     "dev": "rollup -c -w",
     "test": "jest",
@@ -42,7 +43,8 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit",
     "prepare": "npm run build",
-    "prepublishOnly": "npm run test && npm run build"
+    "prepublishOnly": "npm run test && npm run build",
+    "verify-build": "node -e \"console.log('🔍 Sprawdzanie ES5...'); const fs=require('fs'); if(!fs.existsSync('dist')){console.log('❌ Brak dist/'); process.exit(1);} const files=fs.readdirSync('dist').filter(f=>f.endsWith('.js')); let issues=false; files.forEach(f=>{const c=fs.readFileSync('dist/'+f,'utf8'); if(c.includes('?.')){console.log('❌',f,'zawiera optional chaining'); issues=true;} if(c.includes('??')){console.log('❌',f,'zawiera nullish coalescing'); issues=true;}}); if(issues) process.exit(1); else console.log('✅ Wszystkie pliki są ES5 compatible');\""
   },
   "peerDependencies": {
     "react": ">=16.8.0",
@@ -52,9 +54,12 @@
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.23.0",
     "@babel/preset-react": "^7.22.0",
+    "@babel/preset-typescript": "^7.27.1",
     "@eslint/js": "^9.36.0",
+    "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^13.4.0",
@@ -67,6 +72,7 @@
     "@typescript-eslint/eslint-plugin": "^8.44.1",
     "@typescript-eslint/parser": "^8.44.1",
     "babel-jest": "^29.7.0",
+    "core-js": "^3.45.1",
     "eslint": "^9.36.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -87,5 +93,29 @@
   "optionalDependencies": {
     "@mui/icons-material": "^5.15.3",
     "@mui/material": "^5.15.3"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "ie": "11",
+            "chrome": "58",
+            "firefox": "54",
+            "safari": "11"
+          },
+          "modules": false,
+          "useBuiltIns": "entry",
+          "corejs": 3
+        }
+      ],
+      "@babel/preset-react",
+      "@babel/preset-typescript"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-optional-chaining",
+      "@babel/plugin-proposal-nullish-coalescing-operator"
+    ]
   }
 }

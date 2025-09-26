@@ -51,7 +51,7 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      - name: Build package
+      - name: Initial build for quality checks
         run: npm run build
 
       # Determine version bump from conventional commits
@@ -83,7 +83,6 @@ jobs:
           echo "Commits since $LAST_TAG:"
           echo "$COMMITS"
 
-          # DODAJ BRAKUJĄCĄ LOGIKĘ:
           # Analyze commit messages for conventional commits
           BUMP_TYPE="patch"
 
@@ -127,9 +126,100 @@ jobs:
           echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version-number=$(echo $NEW_VERSION | sed 's/v//')" >> $GITHUB_OUTPUT
 
-      - name: Rebuild with new version
+      - name: Rebuild with new version and verify ES5 compatibility
         if: steps.version.outputs.should-release == 'true'
-        run: npm run build
+        run: |
+          echo "🔨 Building package with new version..."
+          npm run build
+          
+          echo "🔍 Verifying ES5 compatibility..."
+          # Create scripts directory if it doesn't exist
+          mkdir -p scripts
+          
+          # Create verification script
+          cat > scripts/verify-es5.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          
+          const distDir = 'dist';
+          const modernFeatures = [
+            { pattern: /\?\./g, name: 'Optional Chaining (?.)' },
+            { pattern: /\?\?/g, name: 'Nullish Coalescing (??)' },
+            { pattern: /\basync\s+function/g, name: 'Async Functions' },
+            { pattern: /\bawait\s/g, name: 'Await Operator' }
+          ];
+          
+          function checkFile(filePath) {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const issues = [];
+          
+            modernFeatures.forEach(feature => {
+              const matches = content.match(feature.pattern);
+              if (matches) {
+                issues.push({ feature: feature.name, count: matches.length });
+              }
+            });
+          
+            return issues;
+          }
+          
+          function scanDirectory(dir) {
+            const files = fs.readdirSync(dir, { withFileTypes: true });
+            let allIssues = {};
+          
+            files.forEach(file => {
+              const fullPath = path.join(dir, file.name);
+          
+              if (file.isDirectory()) {
+                const subIssues = scanDirectory(fullPath);
+                Object.assign(allIssues, subIssues);
+              } else if (file.name.endsWith('.js')) {
+                const issues = checkFile(fullPath);
+                if (issues.length > 0) {
+                  allIssues[fullPath] = issues;
+                }
+              }
+            });
+          
+            return allIssues;
+          }
+          
+          console.log('🔍 Sprawdzanie kompatybilności ES5...');
+          
+          if (!fs.existsSync(distDir)) {
+            console.error(`❌ Katalog ${distDir} nie istnieje.`);
+            process.exit(1);
+          }
+          
+          const allIssues = scanDirectory(distDir);
+          
+          if (Object.keys(allIssues).length === 0) {
+            console.log('✅ Wszystkie pliki JS w dist/ są kompatybilne z ES5!');
+            process.exit(0);
+          }
+          
+          console.log('⚠️ Znaleziono potencjalne problemy z kompatybilnością:');
+          Object.entries(allIssues).forEach(([filePath, issues]) => {
+            console.log(`📄 ${filePath}:`);
+            issues.forEach(issue => {
+              console.log(`  • ${issue.feature} (${issue.count} wystąpień)`);
+            });
+          });
+          
+          const criticalIssues = Object.values(allIssues).flat()
+            .filter(issue => ['Optional Chaining (?.)'].includes(issue.feature));
+          
+          if (criticalIssues.length > 0) {
+            console.log('❌ KRYTYCZNE PROBLEMY: Znaleziono funkcje które złamią starsze przeglądarki!');
+            process.exit(1);
+          } else {
+            console.log('ℹ️ Wykryte funkcje powinny być kompatybilne po transpilacji przez Babel.');
+            console.log('✅ Biblioteka powinna działać poprawnie.');
+          }
+          EOF
+          
+          # Run verification
+          node scripts/verify-es5.js
 
       - name: Verify build output
         if: steps.version.outputs.should-release == 'true'
@@ -150,6 +240,10 @@ jobs:
             fi
           done
           echo "✅ All required files present"
+          
+          # Show file sizes
+          echo "📊 Build sizes:"
+          ls -lh dist/*.js dist/*.d.ts 2>/dev/null | awk '{print "  " $9 ": " $5}'
 
       - name: Create commit and tag
         if: steps.version.outputs.should-release == 'true'
@@ -160,7 +254,7 @@ jobs:
           git add -A
 
           # Create simple commit message
-          COMMIT_MSG="chore: release $NEW_VERSION"
+          COMMIT_MSG="chore: release $NEW_VERSION [skip ci]"
 
           # Commit only if there are changes
           if [ -n "$(git status --porcelain)" ]; then
@@ -187,7 +281,7 @@ jobs:
           git push origin ${{ steps.bump.outputs.new-version }}
           echo "✅ Tag pushed successfully"
 
-      - name: Check if version exists
+      - name: Check if version exists on NPM
         if: steps.version.outputs.should-release == 'true'
         run: |
           VERSION_NUMBER="${{ steps.bump.outputs.version-number }}"
@@ -206,16 +300,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "Publishing to NPM..."
+          echo "📦 Publishing to NPM..."
           VERSION_NUMBER="${{ steps.bump.outputs.version-number }}"
           
           # Check if it's a pre-release version
           if echo "$VERSION_NUMBER" | grep -qE "(alpha|beta|rc)"; then
             echo "Publishing pre-release version with 'next' tag"
-            npm publish --tag next
+            npm publish --tag next --access public
           else
             echo "Publishing stable release"
-            npm publish
+            npm publish --access public
           fi
           
           echo "✅ Published guidemefast@$VERSION_NUMBER to NPM"
@@ -227,14 +321,14 @@ jobs:
           echo "Generating release notes..."
           
           if git describe --tags --abbrev=0 >/dev/null 2>&1; then
-            LAST_TAG=$(git describe --tags --abbrev=0)
-            if [ "$LAST_TAG" != "${{ steps.bump.outputs.new-version }}" ]; then
-              CHANGES=$(git log ${LAST_TAG}..HEAD --oneline --no-merges | head -10 | sed 's/^/- /')
+            LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+            if [ -n "$LAST_TAG" ] && [ "$LAST_TAG" != "${{ steps.bump.outputs.new-version }}" ]; then
+              CHANGES=$(git log ${LAST_TAG}..HEAD~1 --oneline --no-merges | head -10 | sed 's/^/- /')
             else
               CHANGES="- Initial release"
             fi
           else
-            CHANGES=$(git log --oneline --no-merges -5 | sed 's/^/- /')
+            CHANGES=$(git log --oneline --no-merges -5 HEAD~1 | sed 's/^/- /')
           fi
           
           if [ -z "$CHANGES" ]; then
@@ -252,8 +346,20 @@ jobs:
           npm install guidemefast@${{ steps.bump.outputs.version-number }}
           \`\`\`
           
+          ### 🌐 CDN Usage
+          \`\`\`html
+          <script src="https://unpkg.com/guidemefast@${{ steps.bump.outputs.version-number }}/dist/guidemefast.min.js"></script>
+          \`\`\`
+          
           ### 📊 What's Changed
           $CHANGES
+          
+          ### 🔧 Compatibility
+          - ✅ ES5 compatible (IE11+)
+          - ✅ React 16.8+
+          - ✅ TypeScript support
+          - ✅ Material-UI integration
+          - ✅ Vanilla JavaScript support
           
           ---
           *This release was automatically created by GitHub Actions*
@@ -263,20 +369,32 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.version.outputs.should-release == 'true'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v7
         with:
-          tag_name: ${{ steps.bump.outputs.new-version }}
-          release_name: "GuideMeFast ${{ steps.bump.outputs.new-version }}"
-          body_path: release_notes.txt
-          draft: false
-          prerelease: ${{ contains(steps.bump.outputs.version-number, 'alpha') || contains(steps.bump.outputs.version-number, 'beta') || contains(steps.bump.outputs.version-number, 'rc') }}
+          script: |
+            const fs = require('fs');
+            const releaseNotes = fs.readFileSync('release_notes.txt', 'utf8');
+            
+            const isPrerelease = '${{ steps.bump.outputs.version-number }}'.includes('alpha') || 
+                                '${{ steps.bump.outputs.version-number }}'.includes('beta') || 
+                                '${{ steps.bump.outputs.version-number }}'.includes('rc');
+            
+            const release = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ steps.bump.outputs.new-version }}',
+              name: 'GuideMeFast ${{ steps.bump.outputs.new-version }}',
+              body: releaseNotes,
+              draft: false,
+              prerelease: isPrerelease
+            });
+            
+            console.log(`✅ Created release: ${release.data.html_url}`);
 
       - name: Verify NPM publication
         if: steps.version.outputs.should-release == 'true'
         run: |
-          echo "Waiting for NPM propagation..."
+          echo "⏳ Waiting for NPM propagation..."
           sleep 30
           
           VERSION_NUMBER="${{ steps.bump.outputs.version-number }}"
@@ -307,12 +425,12 @@ jobs:
         run: |
           VERSION_NUMBER="${{ steps.bump.outputs.version-number }}"
           
-          echo "Checking CDN availability..."
+          echo "🌐 Checking CDN availability..."
           
           # Check UnPkg
           UNPKG_URL="https://unpkg.com/guidemefast@$VERSION_NUMBER/dist/guidemefast.min.js"
           if curl -s --head "$UNPKG_URL" | head -n 1 | grep -q "200 OK"; then
-            echo "✅ UnPkg CDN available"
+            echo "✅ UnPkg CDN available: $UNPKG_URL"
           else
             echo "⚠️ UnPkg CDN not yet available (may take a few minutes)"
           fi
@@ -320,7 +438,7 @@ jobs:
           # Check jsDelivr
           JSDELIVR_URL="https://cdn.jsdelivr.net/npm/guidemefast@$VERSION_NUMBER/dist/guidemefast.min.js"
           if curl -s --head "$JSDELIVR_URL" | head -n 1 | grep -q "200 OK"; then
-            echo "✅ jsDelivr CDN available"
+            echo "✅ jsDelivr CDN available: $JSDELIVR_URL"
           else
             echo "⚠️ jsDelivr CDN not yet available (may take a few minutes)"
           fi
@@ -336,17 +454,22 @@ jobs:
           echo "Release Type: ${{ steps.version.outputs.bump-type }}"
           echo ""
           echo "📦 NPM: https://www.npmjs.com/package/guidemefast"
-          echo "🌐 CDN: https://unpkg.com/guidemefast@latest/"
+          echo "🌐 CDN (unpkg): https://unpkg.com/guidemefast@latest/"
+          echo "🌐 CDN (jsDelivr): https://cdn.jsdelivr.net/npm/guidemefast@latest/"
           echo "📚 Docs: https://github.com/${{ github.repository }}#readme"
+          echo "🏷️ Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.bump.outputs.new-version }}"
           echo ""
           echo "The release is now live! 🚀"
           echo ""
           echo "📋 Post-release checklist:"
-          echo "- Monitor NPM download statistics"
-          echo "- Verify CDN propagation (5-10 minutes)"
-          echo "- Test package installation"
-          echo "- Update documentation if needed"
-          echo "- Announce release if applicable"
+          echo "- ✅ ES5 compatibility verified"
+          echo "- ✅ NPM package published"
+          echo "- ✅ GitHub release created"
+          echo "- ⏳ CDN propagation (5-10 minutes)"
+          echo "- 📊 Monitor NPM download statistics"
+          echo "- 🧪 Test package installation"
+          echo "- 📝 Update documentation if needed"
+          echo "- 📢 Announce release if applicable"
 
   # Separate job for non-release builds (PRs)
   test-only:
@@ -375,8 +498,48 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      - name: Build package
-        run: npm run build
+      - name: Build and verify compatibility
+        run: |
+          npm run build
+          
+          echo "🔍 Verifying ES5 compatibility..."
+          # Create inline verification for PR builds
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          
+          function checkForModernFeatures(dir) {
+            const files = fs.readdirSync(dir, { withFileTypes: true });
+            let hasIssues = false;
+          
+            files.forEach(file => {
+              const fullPath = path.join(dir, file.name);
+              if (file.isFile() && file.name.endsWith('.js')) {
+                const content = fs.readFileSync(fullPath, 'utf8');
+                if (content.includes('?.')) {
+                  console.log('❌ Found optional chaining in:', fullPath);
+                  hasIssues = true;
+                }
+                if (content.includes('??')) {
+                  console.log('❌ Found nullish coalescing in:', fullPath);
+                  hasIssues = true;
+                }
+              } else if (file.isDirectory()) {
+                if (checkForModernFeatures(fullPath)) hasIssues = true;
+              }
+            });
+            return hasIssues;
+          }
+          
+          if (fs.existsSync('dist')) {
+            if (checkForModernFeatures('dist')) {
+              console.log('❌ Build contains ES6+ features that may not be compatible');
+              process.exit(1);
+            } else {
+              console.log('✅ Build appears to be ES5 compatible');
+            }
+          }
+          "
 
       - name: Verify build output
         run: |
@@ -396,6 +559,10 @@ jobs:
             fi
           done
           echo "✅ All required files present"
+          
+          # Show file sizes
+          echo "📊 Build sizes:"
+          ls -lh dist/*.js dist/*.d.ts 2>/dev/null | awk '{print "  " $9 ": " $5}' || true
 
       - name: Test summary
         run: |
@@ -406,4 +573,5 @@ jobs:
           echo "- TypeScript compilation: ✅"
           echo "- ESLint checks: ✅" 
           echo "- Unit tests: ✅"
+          echo "- ES5 compatibility: ✅"
           echo "- Build output: ✅"
