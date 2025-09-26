@@ -5,12 +5,51 @@ import postcss from 'rollup-plugin-postcss';
 import { dts } from 'rollup-plugin-dts';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import { readFileSync } from 'fs';
+import babel from '@rollup/plugin-babel';
 
 // Read package.json
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 
+// Babel config for Node 14 compatibility
+const babelConfig = {
+    exclude: 'node_modules/**',
+    babelHelpers: 'bundled',
+    presets: [
+        [
+            '@babel/preset-env',
+            {
+                targets: {
+                    node: '14.18.0',
+                    browsers: [
+                        'Chrome >= 60',
+                        'Firefox >= 55',
+                        'Safari >= 12',
+                        'Edge >= 15'
+                    ]
+                },
+                modules: false,
+                useBuiltIns: 'usage',
+                corejs: 3
+            }
+        ],
+        [
+            '@babel/preset-react',
+            {
+                runtime: 'automatic'
+            }
+        ],
+        '@babel/preset-typescript'
+    ],
+    plugins: [
+        '@babel/plugin-proposal-optional-chaining',
+        '@babel/plugin-proposal-nullish-coalescing-operator',
+        '@babel/plugin-proposal-class-properties',
+        '@babel/plugin-proposal-private-methods'
+    ]
+};
+
 export default [
-    // Main build
+    // Main build - ES5 compatible
     {
         input: 'src/index.tsx',
         output: [
@@ -39,7 +78,9 @@ export default [
                 inlineSources: true,
                 declaration: true,
                 declarationMap: true,
+                target: 'ES2018', // More compatible target
             }),
+            babel(babelConfig),
             postcss({
                 extract: true,
                 minimize: true,
@@ -73,7 +114,9 @@ export default [
             commonjs(),
             typescript({
                 tsconfig: './tsconfig.json',
+                target: 'ES2018',
             }),
+            babel(babelConfig),
         ],
         external: [
             'react',
@@ -84,7 +127,7 @@ export default [
         ],
     },
 
-    // Vanilla JS build
+    // Vanilla JS build - ES5 compatible
     {
         input: 'src/vanilla.js',
         output: [
@@ -105,6 +148,20 @@ export default [
                 browser: true,
             }),
             commonjs(),
+            babel({
+                exclude: 'node_modules/**',
+                babelHelpers: 'bundled',
+                presets: [
+                    [
+                        '@babel/preset-env',
+                        {
+                            targets: {
+                                browsers: ['ie >= 11']
+                            }
+                        }
+                    ]
+                ]
+            }),
             postcss({
                 extract: false,
                 inject: true,
@@ -113,7 +170,7 @@ export default [
         ],
     },
 
-    // CDN build (includes CSS)
+    // CDN build (includes CSS) - ES5 compatible
     {
         input: 'src/cdn.js',
         output: {
@@ -127,11 +184,33 @@ export default [
                 browser: true,
             }),
             commonjs(),
+            babel({
+                exclude: 'node_modules/**',
+                babelHelpers: 'bundled',
+                presets: [
+                    [
+                        '@babel/preset-env',
+                        {
+                            targets: {
+                                browsers: ['ie >= 11']
+                            }
+                        }
+                    ]
+                ]
+            }),
             postcss({
                 extract: false,
                 inject: true,
                 minimize: true,
             }),
         ],
+    },
+
+    // Type definitions
+    {
+        input: 'dist/index.d.ts',
+        output: [{ file: 'dist/index.d.ts', format: 'esm' }],
+        plugins: [dts()],
+        external: [/\.css$/],
     },
 ];
