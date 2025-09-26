@@ -1,15 +1,23 @@
-// src/setupTests.ts
+// Jest setup file
 import '@testing-library/jest-dom';
-import React from 'react';
 
-// Mock ResizeObserver
+// Mock dla requestAnimationFrame i cancelAnimationFrame
+global.requestAnimationFrame = (callback: FrameRequestCallback): number => {
+    return setTimeout(callback, 16);
+};
+
+global.cancelAnimationFrame = (id: number): void => {
+    clearTimeout(id);
+};
+
+// Mock dla ResizeObserver (używany przez niektóre komponenty)
 global.ResizeObserver = class ResizeObserver {
     observe() {}
     unobserve() {}
     disconnect() {}
 };
 
-// Mock IntersectionObserver
+// Mock dla IntersectionObserver
 //@ts-expect-error weird
 global.IntersectionObserver = class IntersectionObserver {
     constructor() {}
@@ -18,74 +26,68 @@ global.IntersectionObserver = class IntersectionObserver {
     disconnect() {}
 };
 
-// Mock window.matchMedia
+// Mock dla scrollIntoView
+Element.prototype.scrollIntoView = jest.fn();
+
+// Mock dla getBoundingClientRect
+Element.prototype.getBoundingClientRect = jest.fn(() => ({
+    width: 100,
+    height: 100,
+    top: 0,
+    left: 0,
+    bottom: 100,
+    right: 100,
+    x: 0,
+    y: 0,
+    toJSON: jest.fn()
+}));
+
+// Mock dla getComputedStyle
+global.getComputedStyle = jest.fn(() => ({
+    getPropertyValue: jest.fn(() => ''),
+    setProperty: jest.fn(),
+    removeProperty: jest.fn(),
+    getPropertyPriority: jest.fn(() => ''),
+    length: 0,
+    parentRule: null,
+    cssFloat: '',
+    cssText: '',
+    item: jest.fn(() => ''),
+    [Symbol.iterator]: jest.fn()
+})) as any;
+
+// Mock dla window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation(query => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
+        addListener: jest.fn(), // deprecated
+        removeListener: jest.fn(), // deprecated
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),
         dispatchEvent: jest.fn(),
     })),
 });
 
-// Mock scrollIntoView
-Element.prototype.scrollIntoView = jest.fn();
+// Zwiększ domyślny timeout dla async testów
+jest.setTimeout(10000);
 
-// Mock createPortal for React portals
-jest.mock('react-dom', () => ({
-    ...jest.requireActual('react-dom'),
-    createPortal: (node: React.ReactNode) => node,
-}));
-
-// DODAJ TE MOCKI dla GuideMeFast:
-
-// Mock getBoundingClientRect
-Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
-    writable: true,
-    value: jest.fn(() => ({
-        top: 100,
-        left: 200,
-        width: 150,
-        height: 50,
-        right: 350,
-        bottom: 150,
-        x: 200,
-        y: 100,
-        toJSON: jest.fn(),
-    })),
+// Globalne mock dla console.error żeby nie zaśmiecać output testów
+const originalError = console.error;
+beforeAll(() => {
+    console.error = (...args: any[]) => {
+        if (
+            typeof args[0] === 'string' &&
+            args[0].includes('Warning: ReactDOM.render is deprecated')
+        ) {
+            return;
+        }
+        originalError.call(console, ...args);
+    };
 });
 
-// Mock window dimensions
-Object.defineProperty(window, 'innerWidth', {
-    writable: true,
-    configurable: true,
-    value: 1024,
-});
-
-Object.defineProperty(window, 'innerHeight', {
-    writable: true,
-    configurable: true,
-    value: 768,
-});
-
-// Mock requestAnimationFrame
-global.requestAnimationFrame = jest.fn((callback) => {
-    return setTimeout(callback, 16);
-});
-
-global.cancelAnimationFrame = jest.fn((id) => {
-    clearTimeout(id);
-});
-
-// Cleanup after each test
-afterEach(() => {
-    // Clean up timers
-    jest.clearAllTimers();
-    // Clean up mocks
-    jest.clearAllMocks();
+afterAll(() => {
+    console.error = originalError;
 });
