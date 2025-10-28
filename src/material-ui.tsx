@@ -197,7 +197,9 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
                                 gutterBottom
                                 sx={{ fontWeight: 600 }}
                             >
-                                {currentStepData.title}
+                                {typeof currentStepData.title === 'function' 
+                                    ? currentStepData.title({} as any) 
+                                    : currentStepData.title}
                             </Typography>
                         )}
                         <Typography
@@ -205,7 +207,9 @@ export const MaterialUITour: React.FC<MaterialUITourProps> = ({
                             color="text.secondary"
                             sx={{ lineHeight: 1.6 }}
                         >
-                            {currentStepData?.content}
+                            {currentStepData?.content && (typeof currentStepData.content === 'function'
+                                ? currentStepData.content({} as any)
+                                : currentStepData.content)}
                         </Typography>
                     </Box>
                 </Fade>
@@ -341,7 +345,9 @@ export const MaterialUITourStep: React.FC<{
                     gutterBottom
                     sx={{ fontWeight: 600 }}
                 >
-                    {step.title}
+                    {typeof step.title === 'function' 
+                        ? step.title({} as any) 
+                        : step.title}
                 </Typography>
             )}
 
@@ -350,7 +356,9 @@ export const MaterialUITourStep: React.FC<{
                 color="text.secondary"
                 sx={{ mb: 3, lineHeight: 1.6 }}
             >
-                {step.content}
+                {typeof step.content === 'function'
+                    ? step.content({} as any)
+                    : step.content}
             </Typography>
 
             {/* Actions */}

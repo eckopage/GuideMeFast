@@ -1,4 +1,4 @@
-/* GuideMeFast - Fixed Tooltip Layout */
+/* GuideMeFast - Complete Enhanced Styles with i18n, AI, and Keyboard Support */
 
 /* Base overlay styles */
 .guidemefast-overlay {
@@ -57,7 +57,7 @@
     }
 }
 
-/* Tooltip - CLEANED UP LAYOUT */
+/* Tooltip */
 .guidemefast-tooltip {
     position: fixed !important;
     min-width: 280px;
@@ -73,7 +73,6 @@
     z-index: 10001;
     will-change: transform;
     transform: translateZ(0);
-    /* Remove any padding/margin conflicts */
     padding: 0;
     margin: 0;
 }
@@ -89,7 +88,7 @@
     }
 }
 
-/* Close button - PROPERLY positioned */
+/* Close button */
 .guidemefast-close {
     position: absolute;
     top: 12px;
@@ -120,7 +119,7 @@
     outline-offset: 2px;
 }
 
-/* Progress indicator - NO CONFLICTS */
+/* Progress bar */
 .guidemefast-progress {
     position: absolute;
     top: 0;
@@ -140,7 +139,7 @@
     border-radius: inherit;
 }
 
-/* Step counter - PROPERLY positioned */
+/* Step counter */
 .guidemefast-step-counter {
     position: absolute;
     top: 12px;
@@ -155,7 +154,7 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Content - CLEAN layout */
+/* Content */
 .guidemefast-content {
     padding: 40px 20px 20px;
     /* Ensure content doesn't overlap with positioned elements */
@@ -178,7 +177,7 @@
     font-size: 14px;
 }
 
-/* Navigation - CLEAN layout */
+/* Navigation */
 .guidemefast-navigation {
     padding: 0 20px 20px;
     display: flex;
@@ -248,7 +247,38 @@
     background: rgba(0, 0, 0, 0.02);
 }
 
-/* Arrow - FIXED positioning */
+/* ============================================================================
+   AI FEATURES
+   ============================================================================ */
+
+.guidemefast-ai-personalize {
+    width: 100%;
+    margin: 0 20px 12px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.guidemefast-ai-personalize:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.guidemefast-ai-personalize:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Arrow */
 .guidemefast-arrow {
     position: absolute;
     width: 12px;
@@ -291,7 +321,7 @@
     border-top: none;
 }
 
-/* IMPROVED DARK THEME */
+/* DARK THEME */
 .guidemefast-theme-dark .guidemefast-backdrop {
     background: rgba(0, 0, 0, 0.85);
 }
@@ -417,6 +447,10 @@
     border-color: #334155;
 }
 
+.guidemefast-theme-dark .guidemefast-ai-personalize {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
 /* Material theme */
 .guidemefast-theme-material .guidemefast-tooltip {
     border-radius: 4px;
@@ -498,6 +532,12 @@
     .guidemefast-progress {
         height: 2px;
     }
+
+    .guidemefast-ai-personalize {
+        font-size: 12px;
+        padding: 6px 12px;
+        margin: 0 16px 10px 16px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -553,6 +593,12 @@
     .guidemefast-body {
         font-size: 13px;
     }
+
+    .guidemefast-ai-personalize {
+        font-size: 11px;
+        padding: 6px 10px;
+        margin: 0 12px 8px 12px;
+    }
 }
 
 /* Accessibility improvements */
@@ -566,7 +612,7 @@
     outline-offset: 2px;
 }
 
-/* High contrast mode support */
+/* High contrast mode */
 @media (prefers-contrast: more) {
     .guidemefast-tooltip {
         border: 2px solid;

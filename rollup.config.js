@@ -10,6 +10,16 @@ import babel from '@rollup/plugin-babel';
 // Read package.json
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 
+// Warning handler to suppress "use client" directive warnings
+const onwarn = (warning, warn) => {
+    // Suppress "use client" directive warnings from MUI components
+    if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && warning.message.includes('"use client"')) {
+        return;
+    }
+    // Use default for everything else
+    warn(warning);
+};
+
 // Babel config for Node 14 compatibility
 const babelConfig = {
     exclude: 'node_modules/**',
@@ -52,6 +62,7 @@ export default [
     // Main build - ES5 compatible
     {
         input: 'src/index.tsx',
+        onwarn,
         output: [
             {
                 file: packageJson.main,
@@ -93,6 +104,7 @@ export default [
     // Material-UI build
     {
         input: 'src/material-ui.tsx',
+        onwarn,
         output: [
             {
                 file: 'dist/material-ui.js',
@@ -130,6 +142,7 @@ export default [
     // Vanilla JS build - ES5 compatible
     {
         input: 'src/vanilla.js',
+        onwarn,
         output: [
             {
                 file: 'dist/vanilla.js',
@@ -173,6 +186,7 @@ export default [
     // CDN build (includes CSS) - ES5 compatible
     {
         input: 'src/cdn.js',
+        onwarn,
         output: {
             file: 'dist/guidemefast.min.js',
             format: 'umd',
@@ -209,6 +223,7 @@ export default [
     // Type definitions
     {
         input: 'dist/index.d.ts',
+        onwarn,
         output: [{ file: 'dist/index.d.ts', format: 'esm' }],
         plugins: [dts()],
         external: [/\.css$/],
